@@ -25,6 +25,7 @@ const getMentions = (alerts) => {
 
 async function handleHook(ctx) {
     let hook = ctx.routes[ctx.params.slug];
+
     if (ctx.request.body && Array.isArray(ctx.request.body.alerts)) {
         const raws = [];
         const groupByStatus = groupBy(ctx.request.body.alerts, (alert) => alert.status);
@@ -88,7 +89,7 @@ async function handleHook(ctx) {
         raws.sort((a) => (a.embed.color === colors.resolved ? -1 : 1));
         if (!raws.length) {
             ctx.status = 400;
-            console.warn("No data to write to embeds");
+            ctx.logger.warn("No data to write to embeds");
             return;
         }
 
@@ -109,16 +110,24 @@ async function handleHook(ctx) {
                 .post(hook, payload)
                 .then(() => {
                     ctx.status = 200;
-                    console.log(chunk.length + " embeds sent");
+                    ctx.logger.info(chunk.length + " embeds sent");
                 })
                 .catch((err) => {
                     ctx.status = 500;
-                    console.error(err);
+
+                    const errorConfig = err.config || {};
+                    const errorMessage = err.message
+                      + (errorConfig.method != null ? `; Method: ${errorConfig.method}` : '')
+                      + (errorConfig.data != null ? `; Request data length: ${
+                        errorConfig.data.length
+                      }; Request data: ${JSON.stringify(errorConfig.data)}` : '');
+
+                    ctx.logger.error(`Axios error in "handlers_alternative.js": ${errorMessage}`);
                 });
         }
     } else {
         ctx.status = 400;
-        console.error("Unexpected request from Alertmanager:", ctx.request.body);
+        ctx.logger.error(`Unexpected request from Alertmanager: ${JSON.stringify(ctx.request.body)}`);
     }
 }
 

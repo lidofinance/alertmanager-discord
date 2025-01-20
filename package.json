@@ -3,7 +3,7 @@
   "author": "lidofinance",
   "license": "MIT",
   "main": "index.js",
-  "version": "2.2.0",
+  "version": "2.7.0",
   "scripts": {
     "test": "jest",
     "lint": "prettier --write ."
@@ -15,7 +15,9 @@
     "koa": "^2.13.4",
     "koa-bodyparser": "^4.3.0",
     "marked": "^5.0.2",
-    "squirrelly": "^8.0.8"
+    "squirrelly": "^8.0.8",
+    "winston": "^3.4.0",
+    "traverse": "^0.6.7"
   },
   "devDependencies": {
     "jest": "^27.5.1",

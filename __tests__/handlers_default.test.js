@@ -18,6 +18,11 @@ test("hook works (no mentions)", async () => {
   // mock
   const ctx = {
     routes: { test: "/dev/null" },
+    logger: {
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    },
     params: { slug: "test" },
     query: { q: "42" },
 
@@ -41,6 +46,11 @@ test("hook works (missing annotations subfield)", async () => {
   // mock
   const ctx = {
     routes: { test: "/dev/null" },
+    logger: {
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    },
     params: { slug: "test" },
     query: {},
 
@@ -75,11 +85,15 @@ test("hook works (missing annotations subfield)", async () => {
   expect(axios.post.mock.calls).toMatchSnapshot();
 });
 
-
 test("hook works (mentions)", async () => {
   // mock
   const ctx = {
     routes: { test: "/dev/null" },
+    logger: {
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    },
     params: { slug: "test" },
     query: {},
 
@@ -107,6 +121,11 @@ test("hook works (fields)", async () => {
   // mock
   const ctx = {
     routes: { test: "/dev/null" },
+    logger: {
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    },
     params: { slug: "test" },
     query: {},
 
@@ -134,11 +153,15 @@ test("hook works (fields)", async () => {
   expect(axios.post.mock.calls).toMatchSnapshot();
 });
 
-
 test("healthcheck works", async () => {
   // mock
   const ctx = {
     routes: { test: "/dev/null" },
+    logger: {
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    },
     params: { slug: "test" },
     query: {},
   };

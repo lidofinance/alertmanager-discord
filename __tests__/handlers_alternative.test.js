@@ -17,6 +17,11 @@ test("hook works", async () => {
   // mock
   const ctx = {
     routes: { test: "/dev/null" },
+    logger: {
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    },
     params: { slug: "test" },
     request: {
       body: {
@@ -34,7 +39,7 @@ test("hook works", async () => {
   expect(axios.post.mock.calls).toMatchSnapshot();
 });
 
-test("balval features is correct", async () => {
+test("balval features are correct", async () => {
   const getAlert = (i) => {
     return {
       status: i % 2 === 0 ? "resolved" : "fired", // resolved should be first
@@ -53,6 +58,11 @@ test("balval features is correct", async () => {
   // mock
   const ctx = {
     routes: { test: "/dev/null" },
+    logger: {
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    },
     params: { slug: "test" },
     request: {
       body: {
@@ -87,6 +97,11 @@ test("mention works", async () => {
   // mock
   const ctx = {
     routes: { test: "/dev/null" },
+    logger: {
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    },
     params: { slug: "test" },
     request: {
       body: {

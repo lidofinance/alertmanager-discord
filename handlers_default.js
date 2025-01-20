@@ -22,7 +22,7 @@ function getMentions(alert) {
  * @prop {Array.<{text: string}} items
  */
 
-function getFields(alert) {
+function getFields(alert, logger) {
   /** @type {string} */
   const fields_markdown = alert.annotations?.inline_fields;
   if (!fields_markdown) {
@@ -36,7 +36,11 @@ function getFields(alert) {
     validateFieldsList(fields);
     return transformFieldsList(fields);
   } catch (err) {
-    console.error(err);
+    if (logger != null) {
+      logger.error(err.stack);
+    } else {
+      console.error(err);
+    }
     return [];
   }
 }
@@ -77,13 +81,13 @@ async function handleHook(ctx) {
   let hook = ctx.routes[ctx.params.slug];
   if (hook === undefined) {
     ctx.status = 404;
-    console.warn(`Slug "${ctx.params.slug}" was not found in routes`);
+    ctx.logger.warn(`Slug "${ctx.params.slug}" was not found in routes`);
     return;
   }
 
   if (ctx.request.body === undefined || !Array.isArray(ctx.request.body.alerts)) {
     ctx.status = 400;
-    console.error("Unexpected request from Alertmanager:", ctx.request.body);
+    ctx.logger.error(`Unexpected request from Alertmanager: ${JSON.stringify(ctx.request.body)}`);
     return;
   }
 
@@ -111,35 +115,39 @@ async function handleHook(ctx) {
         body.content = mentions.join(" ");
       }
 
-      const fields = getFields(alert);
+      const fields = getFields(alert, ctx.logger);
       if (fields.length) {
         body.embeds.at(0).fields = fields;
       }
 
       objectsToSend.push(body);
     } catch (err) {
-      console.error(err);
+      ctx.logger.error(err.stack);
     }
   });
 
   if (!objectsToSend.length) {
     ctx.status = 400;
-    console.warn(
-      "Nothing to send, all alerts has been filtered out. Recieved data:",
-      ctx.request.body.alerts
-    );
+    ctx.logger.warn(`Nothing to send, all alerts has been filtered out. Received data: ${JSON.stringify(ctx.request.body.alerts)}`);
     return;
   }
 
   for (const body of objectsToSend) {
     await axios.post(hook, body, { params: ctx.query }).catch((err) => {
       ctx.status = 500;
-      console.error(err);
-      return;
+
+      const errorConfig = err.config || {};
+      const errorMessage = err.message
+        + (errorConfig.method != null ? `; Method: ${errorConfig.method}` : '')
+        + (errorConfig.data != null ? `; Request data length: ${
+          errorConfig.data.length
+        }; Request data: ${JSON.stringify(errorConfig.data)}` : '');
+
+      ctx.logger.error(`Axios error in "handlers_default.js": ${errorMessage}`);
     });
   }
 
-  console.log(`${objectsToSend.length} objects have been sent`);
+  ctx.logger.info(`${objectsToSend.length} objects have been sent`);
 }
 
 async function handleHealthcheck(ctx) {
@@ -151,7 +159,7 @@ async function handleHealthcheck(ctx) {
   }
 
   if (hook === undefined) {
-    console.warn("No routes has been configured!");
+    ctx.logger.warn("No routes has been configured!");
     ctx.status = 503;
     return;
   }
@@ -165,9 +173,9 @@ async function handleHealthcheck(ctx) {
     .catch((err) => {
       ctx.status = 503;
       if (err.response && err.response.data) {
-        console.error(err.response.data);
+        ctx.logger.error(`handleHealthcheck: ${JSON.stringify(err.response.data)}`);
       } else {
-        console.error(err);
+        ctx.logger.error(`handleHealthcheck: ${err.message}`);
       }
     });
 }

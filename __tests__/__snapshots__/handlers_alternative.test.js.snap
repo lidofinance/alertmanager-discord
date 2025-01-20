@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`balval features is correct 1`] = `
+exports[`balval features are correct 1`] = `
 Array [
   Array [
     "/dev/null",
