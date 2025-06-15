@@ -194,19 +194,31 @@ test("getMentions works (valid label's value)", () => {
 });
 
 test("getFields works (no inline_fields)", () => {
+  const logger = {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
+
   const fields = getFields({
     annotations: {},
-  });
+  }, logger);
 
   expect(fields.length).toBe(0);
 });
 
 test("getFields works (not a list)", () => {
+  const logger = {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
+
   const fields = getFields({
     annotations: {
       inline_fields: "**hm**",
     },
-  });
+  }, logger);
 
   expect(fields.length).toBe(0);
 })
