@@ -1,8 +1,9 @@
 const axios = require("axios");
 
 const colors = { firing: 0xd50000, resolved: 0x00c853 };
-const maxEmbedsLength = 10;
-const maxFieldsLength = 25;
+const maxEmbedsLength = process.env.MAX_EMBEDS_LENGTH != null ? parseInt(process.env.MAX_EMBEDS_LENGTH, 10) : 10;
+const maxFieldsLength = process.env.MAX_FIELDS_LENGTH != null ? parseInt(process.env.MAX_FIELDS_LENGTH, 10) : 25;
+
 const groupBy = (array, func) => {
     return array.reduce((group, item) => {
         const groupName = func(item);
