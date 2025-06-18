@@ -1,8 +1,7 @@
 const axios = require("axios");
 
 const colors = { firing: 0xd50000, resolved: 0x00c853 };
-const maxEmbedsLength = 10;
-const maxFieldsLength = 25;
+
 const groupBy = (array, func) => {
     return array.reduce((group, item) => {
         const groupName = func(item);
@@ -43,7 +42,7 @@ async function handleHook(ctx) {
                         : a.annotations.description;
                 if (first.annotations["field_name"] && first.annotations["field_value"]) {
                     let chunk = [];
-                    while ((chunk = byStatus.splice(0, maxFieldsLength)) && chunk.length) {
+                    while ((chunk = byStatus.splice(0, ctx.messageParams.maxFieldsLength)) && chunk.length) {
                         raws.push({
                             mentions: getMentions(chunk),
                             embed: {
@@ -94,7 +93,7 @@ async function handleHook(ctx) {
         }
 
         let chunk = [];
-        while ((chunk = raws.splice(0, maxEmbedsLength)) && chunk.length) {
+        while ((chunk = raws.splice(0, ctx.messageParams.maxEmbedsLength)) && chunk.length) {
             // Discord displays only one embed if several embeds have the same url in one message.
             // Then only one (last fired) embed will have URL in each chunk
             chunk.forEach((e) =>

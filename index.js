@@ -8,7 +8,18 @@ const winston = require("winston");
 const { router } = require("./router");
 const { cleanSecrets } = require("./secrets");
 
-const port = process.env.PORT || 5001;
+const port = toInteger(process.env.PORT) || 5001;
+
+let maxEmbedsLength = toInteger(process.env.MAX_EMBEDS_LENGTH) || 10;
+if (maxEmbedsLength <= 0 || maxEmbedsLength > 10) {
+  maxEmbedsLength = 10;
+}
+
+let maxFieldsLength = toInteger(process.env.MAX_FIELDS_LENGTH) || 25;
+if (maxFieldsLength <= 0 || maxFieldsLength > 25) {
+  maxFieldsLength = 25;
+}
+
 const configPath = "/etc/alertmanager-discord.yml";
 const hookRegExp = new RegExp("https://discord(?:app)?.com/api/webhooks/[0-9]+/[a-zA-Z0-9_-]+");
 
@@ -55,6 +66,10 @@ if (require.main === module) {
 
   app.context.routes = routes;
   app.context.logger = logger;
+  app.context.messageParams = {
+    maxEmbedsLength,
+    maxFieldsLength,
+  };
   app.use(router.routes());
 
   app.listen(port, (err) => {
@@ -65,4 +80,24 @@ if (require.main === module) {
 
     logger.info("Listening on port " + port);
   });
+}
+
+function toInteger(value) {
+  if (value == null) {
+    return null;
+  }
+
+  const strValue = value.toString().trim();
+
+  if (strValue === '') {
+    return null;
+  }
+
+  const numValue = Number(strValue);
+
+  if (Number.isInteger(numValue)) {
+    return numValue;
+  }
+
+  return null;
 }
