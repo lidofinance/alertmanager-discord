@@ -22,6 +22,10 @@ test("hook works", async () => {
       warn: jest.fn(),
       error: jest.fn(),
     },
+    messageParams: {
+      maxEmbedsLength: 10,
+      maxFieldsLength: 25,
+    },
     params: { slug: "test" },
     request: {
       body: {
@@ -63,6 +67,10 @@ test("balval features are correct", async () => {
       warn: jest.fn(),
       error: jest.fn(),
     },
+    messageParams: {
+      maxEmbedsLength: 10,
+      maxFieldsLength: 25,
+    },
     params: { slug: "test" },
     request: {
       body: {
@@ -101,6 +109,10 @@ test("mention works", async () => {
       info: jest.fn(),
       warn: jest.fn(),
       error: jest.fn(),
+    },
+    messageParams: {
+      maxEmbedsLength: 10,
+      maxFieldsLength: 25,
     },
     params: { slug: "test" },
     request: {

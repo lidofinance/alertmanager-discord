@@ -99,6 +99,17 @@ It will allow you to describe alerts in the following way:
 And it will produce the following result:
 ![img.png](.images/img.png)
 
+## Alerts batching
+
+It is possible to configure the number of records in one message of the Discord alert body, and the number of messages
+in the Discord alert. This is possible using the following environment variables:
+```yaml
+environment:
+  MAX_EMBEDS_LENGTH: 10
+  MAX_FIELDS_LENGTH: 25
+```
+The default values for these environment variables are 10 and 25 respectively.
+
 ## Release flow
 
 To create new release:
