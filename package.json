@@ -3,7 +3,7 @@
   "author": "lidofinance",
   "license": "MIT",
   "main": "index.js",
-  "version": "2.8.0",
+  "version": "2.9.0",
   "scripts": {
     "test": "jest",
     "lint": "prettier --write ."
