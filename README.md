@@ -94,7 +94,8 @@ Look at [squirrelly](https://squirrelly.js.org) docs for templating reference.
 
 #### Inline fields
 
-Provide `inline_fields` alert's annotation to insert the inline fields with the values provided by the markdown list:
+Provide `inline_fields` alert's annotation to insert inline fields in Discord or a Slack rich_text bullet list
+using values from a markdown list:
 
 ```yaml
 inline_fields: |

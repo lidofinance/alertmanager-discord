@@ -28,67 +28,37 @@ Array [
           "type": "section",
         },
         Object {
-          "rows": Array [
+          "elements": Array [
             Object {
-              "cells": Array [
+              "elements": Array [
                 Object {
-                  "text": "1",
-                  "type": "raw_text",
-                },
-                Object {
-                  "text": "",
-                  "type": "raw_text",
+                  "elements": Array [
+                    Object {
+                      "style": Object {
+                        "bold": true,
+                      },
+                      "text": "field",
+                      "type": "text",
+                    },
+                  ],
+                  "type": "rich_text_section",
                 },
                 Object {
                   "elements": Array [
                     Object {
-                      "elements": Array [
-                        Object {
-                          "style": Object {
-                            "bold": true,
-                          },
-                          "text": "field",
-                          "type": "text",
-                        },
-                      ],
-                      "type": "rich_text_section",
+                      "text": "value",
+                      "type": "link",
+                      "url": "https://example.com/path",
                     },
                   ],
-                  "type": "rich_text",
+                  "type": "rich_text_section",
                 },
               ],
-              "type": "table_row",
-            },
-            Object {
-              "cells": Array [
-                Object {
-                  "text": "2",
-                  "type": "raw_text",
-                },
-                Object {
-                  "text": "",
-                  "type": "raw_text",
-                },
-                Object {
-                  "elements": Array [
-                    Object {
-                      "elements": Array [
-                        Object {
-                          "text": "value",
-                          "type": "link",
-                          "url": "https://example.com/path",
-                        },
-                      ],
-                      "type": "rich_text_section",
-                    },
-                  ],
-                  "type": "rich_text",
-                },
-              ],
-              "type": "table_row",
+              "style": "bullet",
+              "type": "rich_text_list",
             },
           ],
-          "type": "table",
+          "type": "rich_text",
         },
         Object {
           "elements": Array [

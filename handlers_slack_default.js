@@ -3,8 +3,8 @@ const { compileTitle, compileDescr } = require("./templating");
 const { getFields } = require("./handlers_default");
 const {
   buildContextBlock,
+  buildRichTextListBlock,
   buildSectionBlock,
-  buildTableBlock,
   convertMarkdownToSlack,
   getSlackMentions,
   logSlackError,
@@ -39,11 +39,10 @@ const buildBlocks = (alert, logger) => {
 
   const fields = getFields(alert, logger);
   if (fields.length) {
-    const rows = fields.map((field) => ({
-      field_name: field.name || "",
-      field_value: field.value || "",
-    }));
-    blocks.push(buildTableBlock(rows));
+    const listItems = fields.map((field) => String(field.value || "")).filter((value) => value);
+    if (listItems.length) {
+      blocks.push(buildRichTextListBlock(listItems));
+    }
   }
 
   const footerBlock = buildContextBlock(
