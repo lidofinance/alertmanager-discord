@@ -1,0 +1,115 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`hook works (mentions, table, markdown) 1`] = `
+Array [
+  Array [
+    "/dev/null",
+    Object {
+      "blocks": Array [
+        Object {
+          "text": Object {
+            "text": "*Bold summary*",
+            "type": "mrkdwn",
+          },
+          "type": "section",
+        },
+        Object {
+          "text": Object {
+            "text": "See <https://example.com|link>",
+            "type": "mrkdwn",
+          },
+          "type": "section",
+        },
+        Object {
+          "text": Object {
+            "text": "<@U123> @here <@U456>",
+            "type": "mrkdwn",
+          },
+          "type": "section",
+        },
+        Object {
+          "rows": Array [
+            Object {
+              "cells": Array [
+                Object {
+                  "text": "1",
+                  "type": "raw_text",
+                },
+                Object {
+                  "text": "",
+                  "type": "raw_text",
+                },
+                Object {
+                  "elements": Array [
+                    Object {
+                      "elements": Array [
+                        Object {
+                          "style": Object {
+                            "bold": true,
+                          },
+                          "text": "field",
+                          "type": "text",
+                        },
+                      ],
+                      "type": "rich_text_section",
+                    },
+                  ],
+                  "type": "rich_text",
+                },
+              ],
+              "type": "table_row",
+            },
+            Object {
+              "cells": Array [
+                Object {
+                  "text": "2",
+                  "type": "raw_text",
+                },
+                Object {
+                  "text": "",
+                  "type": "raw_text",
+                },
+                Object {
+                  "elements": Array [
+                    Object {
+                      "elements": Array [
+                        Object {
+                          "text": "value",
+                          "type": "link",
+                          "url": "https://example.com/path",
+                        },
+                      ],
+                      "type": "rich_text_section",
+                    },
+                  ],
+                  "type": "rich_text",
+                },
+              ],
+              "type": "table_row",
+            },
+          ],
+          "type": "table",
+        },
+        Object {
+          "elements": Array [
+            Object {
+              "alt_text": "footer icon",
+              "image_url": "https://example.com/icon.png",
+              "type": "image",
+            },
+            Object {
+              "text": "Footer *bold*",
+              "type": "mrkdwn",
+            },
+          ],
+          "type": "context",
+        },
+      ],
+      "text": "",
+    },
+    Object {
+      "params": Object {},
+    },
+  ],
+]
+`;

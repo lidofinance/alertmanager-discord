@@ -1,7 +1,7 @@
 const axios = require("axios");
 jest.mock("axios");
 
-const { handleHook, handleHealthcheck, getMentions, getFields } = require("../handlers_default");
+const { handleHook, getMentions, getFields } = require("../handlers_default");
 
 function getAlert(i) {
   return {
@@ -151,28 +151,6 @@ test("hook works (fields)", async () => {
 
   expect(ctx.status).toBe(200);
   expect(axios.post.mock.calls).toMatchSnapshot();
-});
-
-test("healthcheck works", async () => {
-  // mock
-  const ctx = {
-    routes: { test: "/dev/null" },
-    logger: {
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    },
-    params: { slug: "test" },
-    query: {},
-  };
-
-  axios.get.mockResolvedValue(null);
-
-  await handleHealthcheck(ctx, () => {});
-
-  expect(ctx.status).toBe(200);
-  expect(ctx.body.uptime).toBeDefined();
-  expect(axios.get.mock.calls).toMatchSnapshot();
 });
 
 test("getMentions works (no label)", () => {

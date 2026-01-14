@@ -1,8 +1,23 @@
 const Router = require("@koa/router");
 const bodyParser = require("koa-bodyparser");
 
-const { handleHook, handleHealthcheck } = require("./handlers_default");
-const { handleHook: handleHookAlt } = require("./handlers_alternative");
+const { handleHook: handleHookDiscord } = require("./handlers_default");
+const { handleHook: handleHookDiscordAlt } = require("./handlers_alternative");
+const { handleHook: handleHookSlack } = require("./handlers_slack_default");
+const { handleHook: handleHookSlackAlt } = require("./handlers_slack_alternative");
+const { handleHealthcheck } = require("./healthcheck");
+
+const getHandler = (route, workingMode) => {
+  if (!route) {
+    return null;
+  }
+
+  if (route.type === "slack") {
+    return workingMode === "alternative" ? handleHookSlackAlt : handleHookSlack;
+  }
+
+  return workingMode === "alternative" ? handleHookDiscordAlt : handleHookDiscord;
+};
 
 const router = new Router();
 
@@ -23,7 +38,23 @@ router
         ctx.throw(400);
       },
     }),
-    process.env.WORKING_MODE === "alternative" ? handleHookAlt : handleHook
+    async (ctx) => {
+      const route = ctx.routes[ctx.params.slug];
+      if (!route) {
+        ctx.status = 404;
+        ctx.logger.warn(`Slug "${ctx.params.slug}" was not found in routes`);
+        return;
+      }
+
+      const handler = getHandler(route, process.env.WORKING_MODE);
+      if (!handler) {
+        ctx.status = 500;
+        ctx.logger.error(`No handler found for slug "${ctx.params.slug}"`);
+        return;
+      }
+
+      await handler(ctx);
+    }
   )
   .get("/health", handleHealthcheck);
 

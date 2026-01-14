@@ -78,8 +78,9 @@ function transformFieldsList(list) {
 async function handleHook(ctx) {
   ctx.status = 200;
 
-  let hook = ctx.routes[ctx.params.slug];
-  if (hook === undefined) {
+  const route = ctx.routes[ctx.params.slug];
+  const hook = typeof route === "string" ? route : route?.hook;
+  if (!hook) {
     ctx.status = 404;
     ctx.logger.warn(`Slug "${ctx.params.slug}" was not found in routes`);
     return;
@@ -157,39 +158,8 @@ async function handleHook(ctx) {
   ctx.logger.info(`${objectsToSend.length} objects have been sent`);
 }
 
-async function handleHealthcheck(ctx) {
-  let hook;
-
-  for (const key in ctx.routes) {
-    hook = ctx.routes[key];
-    break;
-  }
-
-  if (hook === undefined) {
-    ctx.logger.warn("No routes has been configured!");
-    ctx.status = 503;
-    return;
-  }
-
-  await axios
-    .get(hook)
-    .then(() => {
-      ctx.status = 200;
-      ctx.body = { uptime: process.uptime() };
-    })
-    .catch((err) => {
-      ctx.status = 503;
-      if (err.response && err.response.data) {
-        ctx.logger.error(`handleHealthcheck: ${JSON.stringify(err.response.data)}`);
-      } else {
-        ctx.logger.error(`handleHealthcheck: ${err.message}`);
-      }
-    });
-}
-
 module.exports = {
   handleHook,
-  handleHealthcheck,
   getMentions,
   getFields,
 };
