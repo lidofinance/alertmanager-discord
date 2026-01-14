@@ -5,6 +5,8 @@ const {
   buildTableBlock,
   convertMarkdownToSlack,
   getSlackMentions,
+  logSlackError,
+  logSlackResponse,
 } = require("./slack_helpers");
 
 const groupBy = (array, func) => {
@@ -47,27 +49,6 @@ const formatTitle = (title, url, isResolved) => {
   }
 
   return converted;
-};
-
-const logSlackResponse = (ctx, response) => {
-  ctx.logger.info(`Slack webhook responded with status ${response.status}`);
-};
-
-const logSlackError = (ctx, err) => {
-  const status = err.response?.status;
-  if (status != null) {
-    const body = err.response?.data;
-    ctx.logger.error(
-      `Slack webhook responded with status ${status}${
-        body != null ? `; Body: ${JSON.stringify(body)}` : ""
-      }`
-    );
-    ctx.status = 500;
-    return;
-  }
-
-  ctx.status = 500;
-  ctx.logger.error(`Slack webhook error: ${err.message}`);
 };
 
 async function handleHook(ctx) {
