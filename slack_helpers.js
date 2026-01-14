@@ -107,6 +107,22 @@ const buildRichTextCell = (text) => {
   };
 };
 
+const buildRichTextListBlock = (items) => {
+  return {
+    type: "rich_text",
+    elements: [
+      {
+        type: "rich_text_list",
+        style: "bullet",
+        elements: items.map((item) => ({
+          type: "rich_text_section",
+          elements: parseRichTextElements(item),
+        })),
+      },
+    ],
+  };
+};
+
 const buildTableBlock = (rows) => {
   return {
     type: "table",
@@ -166,6 +182,7 @@ const buildContextBlock = (footerText, footerIconUrl) => {
 module.exports = {
   buildContextBlock,
   buildRichTextCell,
+  buildRichTextListBlock,
   buildSectionBlock,
   buildTableBlock,
   convertMarkdownToSlack,
