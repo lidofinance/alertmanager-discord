@@ -23,13 +23,7 @@ const getMentions = (alerts) => {
 };
 
 async function handleHook(ctx) {
-  const route = ctx.routes[ctx.params.slug];
-  const hook = typeof route === "string" ? route : route?.hook;
-  if (!hook) {
-    ctx.status = 404;
-    ctx.logger.warn(`Slug "${ctx.params.slug}" was not found in routes`);
-    return;
-  }
+  const hook = ctx.state.hook;
 
   if (ctx.request.body && Array.isArray(ctx.request.body.alerts)) {
     const raws = [];

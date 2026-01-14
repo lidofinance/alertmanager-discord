@@ -21,7 +21,7 @@ test("hook works (table chunking, resolved first)", async () => {
   });
 
   const ctx = {
-    routes: { test: "/dev/null" },
+    state: { hook: "/dev/null" },
     logger: {
       info: jest.fn(),
       warn: jest.fn(),

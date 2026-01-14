@@ -17,7 +17,7 @@ function getAlert(i) {
 test("hook works (no mentions)", async () => {
   // mock
   const ctx = {
-    routes: { test: "/dev/null" },
+    state: { hook: "/dev/null" },
     logger: {
       info: jest.fn(),
       warn: jest.fn(),
@@ -45,7 +45,7 @@ test("hook works (no mentions)", async () => {
 test("hook works (missing annotations subfield)", async () => {
   // mock
   const ctx = {
-    routes: { test: "/dev/null" },
+    state: { hook: "/dev/null" },
     logger: {
       info: jest.fn(),
       warn: jest.fn(),
@@ -88,7 +88,7 @@ test("hook works (missing annotations subfield)", async () => {
 test("hook works (mentions)", async () => {
   // mock
   const ctx = {
-    routes: { test: "/dev/null" },
+    state: { hook: "/dev/null" },
     logger: {
       info: jest.fn(),
       warn: jest.fn(),
@@ -120,7 +120,7 @@ test("hook works (mentions)", async () => {
 test("hook works (fields)", async () => {
   // mock
   const ctx = {
-    routes: { test: "/dev/null" },
+    state: { hook: "/dev/null" },
     logger: {
       info: jest.fn(),
       warn: jest.fn(),
