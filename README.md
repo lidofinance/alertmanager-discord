@@ -1,4 +1,4 @@
-Converts Prometheus Alertmanager webhook to Discord webhook.
+Converts Prometheus Alertmanager webhook to Discord or Slack webhooks.
 
 ## Usage
 
@@ -9,11 +9,25 @@ Store configuration at `/etc/alertmanager-discord.yml` file e.g.:
 ```yaml
 hooks:
   - slug: collaterals-monitoring
-    hook: https://discord.com/api/webhook/123
+    type: discord
+    hook: https://discord.com/api/webhooks/123
   - slug: balval-alerts
-    hook: https://discord.com/api/webhook/456
+    type: discord
+    hook: https://discord.com/api/webhooks/456
   - slug: automation-eng
-    hook: https://discord.com/api/webhook/789
+    type: slack
+    hook: https://hooks.slack.com/services/T000/B000/XXX
+```
+
+If `type` is omitted, `discord` is used by default.
+
+Slack hooks should use `type: slack` with a Slack incoming webhook URL:
+
+```yaml
+hooks:
+  - slug: evm-slack
+    type: slack
+    hook: https://hooks.slack.com/services/T000/B000/XXX
 ```
 
 Configure alertmanager to send alerts to the related hook:
@@ -42,6 +56,23 @@ mentions: <user_id_0>,<user_id_1>
 
 User ID may be found on Discord by **Copy ID** context menu item available with
 developer mode is turned on.
+
+#### Slack users mentions
+
+Provide `slack_mentions` alert's label value to mention arbitrary Slack users:
+
+```yaml
+slack_mentions: U123,U456,@here
+```
+
+#### Slack tables limit
+
+Slack tables are chunked by `MAX_TABLE_ROWS` (default 50, max 100):
+
+```yaml
+environment:
+  MAX_TABLE_ROWS: 50
+```
 
 #### Title and description templating
 
