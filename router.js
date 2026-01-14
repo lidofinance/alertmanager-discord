@@ -15,17 +15,15 @@ router
         json: ["*/*"],
       },
       onerror: (err, ctx) => {
-        ctx.logger.warn(`Status: ${
-          err.status
-        }; Body length: ${
-          err.body != null ? err.body.length : 0
-        }; Body: ${
-          JSON.stringify(err.body)
-        }; Error stack: ${err.stack}`);
+        ctx.logger.warn(
+          `Status: ${err.status}; Body length: ${
+            err.body != null ? err.body.length : 0
+          }; Body: ${JSON.stringify(err.body)}; Error stack: ${err.stack}`
+        );
         ctx.throw(400);
       },
     }),
-    process.env.WORKING_MODE === 'alternative' ? handleHookAlt : handleHook
+    process.env.WORKING_MODE === "alternative" ? handleHookAlt : handleHook
   )
   .get("/health", handleHealthcheck);
 

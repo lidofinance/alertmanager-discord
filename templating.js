@@ -1,7 +1,7 @@
 const sqrl = require("squirrelly");
 
 sqrl.filters.define("d", (value, defaultValue) => {
-    return value || defaultValue;
+  return value || defaultValue;
 });
 
 const titleTmpl = process.env.TITLE_TMPL || "";

@@ -74,28 +74,32 @@ inline_fields: |
 
 If you want to use this service in alternative working mode, you can provide `WORKING_MODE` environment variable.
 For docker-compose it may look like this:
+
 ```yaml
 environment:
   WORKING_MODE: "alternative"
 ```
+
 It will allow you to describe alerts in the following way:
+
 ```yaml
-      - alert: NumValidatorsWithNegativeDelta
-        expr: ethereum_validators_monitoring_validator_count_with_negative_balances_delta > 0 AND ON() changes(ethereum_validators_monitoring_epoch_number[1m]) > 0
-        labels:
-          severity: critical
-        annotations:
-          emoji: 💸
-          summary: 'Operators have a negative balance delta'
-          resolved_summary: 'Operators have a positive balance delta'
-          description: 'Number of validators per operator who have a negative balance delta.'
-          resolved_description: 'Number of validators per operator who recovered.'
-          field_name: '{{ $labels.nos_name }}'
-          field_value: '[{{ $value | printf "%.0f" }}](http://127.0.0.1:8082/d/3wimU2H7h/nodeoperators/?var-nos_name_var={{ urlquery $labels.nos_name }}&from={{ with query "(time() - 1200) * 1000" }}{{ . | first | value | printf "%f" }}{{ end }}&to={{ with query "time() * 1000" }}{{ . | first | value | printf "%f" }}{{ end }})'
-          url: "http://127.0.0.1:8082/d/HRgPmpNnz/validators"
-          footer_text: 'Epoch • {{ with query "ethereum_validators_monitoring_epoch_number" }}{{ . | first | value | printf "%.0f" }}{{ end }}'
-          footer_icon_url: "https://cryptologos.cc/logos/steth-steth-logo.png"
+- alert: NumValidatorsWithNegativeDelta
+  expr: ethereum_validators_monitoring_validator_count_with_negative_balances_delta > 0 AND ON() changes(ethereum_validators_monitoring_epoch_number[1m]) > 0
+  labels:
+    severity: critical
+  annotations:
+    emoji: 💸
+    summary: "Operators have a negative balance delta"
+    resolved_summary: "Operators have a positive balance delta"
+    description: "Number of validators per operator who have a negative balance delta."
+    resolved_description: "Number of validators per operator who recovered."
+    field_name: "{{ $labels.nos_name }}"
+    field_value: '[{{ $value | printf "%.0f" }}](http://127.0.0.1:8082/d/3wimU2H7h/nodeoperators/?var-nos_name_var={{ urlquery $labels.nos_name }}&from={{ with query "(time() - 1200) * 1000" }}{{ . | first | value | printf "%f" }}{{ end }}&to={{ with query "time() * 1000" }}{{ . | first | value | printf "%f" }}{{ end }})'
+    url: "http://127.0.0.1:8082/d/HRgPmpNnz/validators"
+    footer_text: 'Epoch • {{ with query "ethereum_validators_monitoring_epoch_number" }}{{ . | first | value | printf "%.0f" }}{{ end }}'
+    footer_icon_url: "https://cryptologos.cc/logos/steth-steth-logo.png"
 ```
+
 And it will produce the following result:
 ![img.png](.images/img.png)
 
@@ -103,11 +107,13 @@ And it will produce the following result:
 
 It is possible to configure the number of records in one message of the Discord alert body, and the number of messages
 in the Discord alert. This is possible using the following environment variables:
+
 ```yaml
 environment:
   MAX_EMBEDS_LENGTH: 10
   MAX_FIELDS_LENGTH: 25
 ```
+
 The default values for these environment variables are 10 and 25 respectively.
 
 ## Release flow

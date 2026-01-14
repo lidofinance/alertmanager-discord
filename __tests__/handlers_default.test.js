@@ -56,22 +56,22 @@ test("hook works (missing annotations subfield)", async () => {
 
     request: {
       body: {
-          alerts: [
-              {
-                status: "resolved",
-                labels: { alertname: "activate" },
-                annotations: {
-                  summary: "here was no description"
-                },
-              },
-              {
-                status: "resolved",
-                labels: { alertname: "activate" },
-                annotations: {
-                  description: "here was no summary"
-                },
-              },
-          ],
+        alerts: [
+          {
+            status: "resolved",
+            labels: { alertname: "activate" },
+            annotations: {
+              summary: "here was no description",
+            },
+          },
+          {
+            status: "resolved",
+            labels: { alertname: "activate" },
+            annotations: {
+              description: "here was no summary",
+            },
+          },
+        ],
       },
     },
   };
@@ -147,7 +147,7 @@ test("hook works (fields)", async () => {
 
   axios.post.mockResolvedValue(null);
 
-  await handleHook(ctx, () => { });
+  await handleHook(ctx, () => {});
 
   expect(ctx.status).toBe(200);
   expect(axios.post.mock.calls).toMatchSnapshot();
@@ -200,9 +200,12 @@ test("getFields works (no inline_fields)", () => {
     error: jest.fn(),
   };
 
-  const fields = getFields({
-    annotations: {},
-  }, logger);
+  const fields = getFields(
+    {
+      annotations: {},
+    },
+    logger
+  );
 
   expect(fields.length).toBe(0);
 });
@@ -214,14 +217,17 @@ test("getFields works (not a list)", () => {
     error: jest.fn(),
   };
 
-  const fields = getFields({
-    annotations: {
-      inline_fields: "**hm**",
+  const fields = getFields(
+    {
+      annotations: {
+        inline_fields: "**hm**",
+      },
     },
-  }, logger);
+    logger
+  );
 
   expect(fields.length).toBe(0);
-})
+});
 
 test("getFields works (valid list)", () => {
   const fields = getFields({
@@ -231,7 +237,7 @@ test("getFields works (valid list)", () => {
   });
 
   expect(fields.length).toBe(1);
-})
+});
 
 test("getFields works (nested list)", () => {
   const fields = getFields({
@@ -241,4 +247,4 @@ test("getFields works (nested list)", () => {
   });
 
   expect(fields.length).toBe(1);
-})
+});
