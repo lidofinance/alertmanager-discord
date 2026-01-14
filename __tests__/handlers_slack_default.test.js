@@ -5,7 +5,7 @@ const { handleHook } = require("../handlers_slack_default");
 
 test("hook works (mentions, table, markdown)", async () => {
   const ctx = {
-    routes: { test: "/dev/null" },
+    state: { hook: "/dev/null" },
     logger: {
       info: jest.fn(),
       warn: jest.fn(),

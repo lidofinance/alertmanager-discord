@@ -73,13 +73,7 @@ const logSlackError = (ctx, err) => {
 async function handleHook(ctx) {
   ctx.status = 200;
 
-  const route = ctx.routes[ctx.params.slug];
-  const hook = typeof route === "string" ? route : route?.hook;
-  if (!hook) {
-    ctx.status = 404;
-    ctx.logger.warn(`Slug "${ctx.params.slug}" was not found in routes`);
-    return;
-  }
+  const hook = ctx.state.hook;
 
   if (ctx.request.body === undefined || !Array.isArray(ctx.request.body.alerts)) {
     ctx.status = 400;

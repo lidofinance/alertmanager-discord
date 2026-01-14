@@ -16,7 +16,7 @@ test("hook works", async () => {
   };
   // mock
   const ctx = {
-    routes: { test: "/dev/null" },
+    state: { hook: "/dev/null" },
     logger: {
       info: jest.fn(),
       warn: jest.fn(),
@@ -61,7 +61,7 @@ test("balval features are correct", async () => {
   };
   // mock
   const ctx = {
-    routes: { test: "/dev/null" },
+    state: { hook: "/dev/null" },
     logger: {
       info: jest.fn(),
       warn: jest.fn(),
@@ -104,7 +104,7 @@ test("mention works", async () => {
   };
   // mock
   const ctx = {
-    routes: { test: "/dev/null" },
+    state: { hook: "/dev/null" },
     logger: {
       info: jest.fn(),
       warn: jest.fn(),

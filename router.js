@@ -53,6 +53,7 @@ router
         return;
       }
 
+      ctx.state.hook = route.hook;
       await handler(ctx);
     }
   )
