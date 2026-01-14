@@ -128,7 +128,11 @@ async function handleHook(ctx) {
 
   if (!objectsToSend.length) {
     ctx.status = 400;
-    ctx.logger.warn(`Nothing to send, all alerts has been filtered out. Received data: ${JSON.stringify(ctx.request.body.alerts)}`);
+    ctx.logger.warn(
+      `Nothing to send, all alerts has been filtered out. Received data: ${JSON.stringify(
+        ctx.request.body.alerts
+      )}`
+    );
     return;
   }
 
@@ -137,11 +141,14 @@ async function handleHook(ctx) {
       ctx.status = 500;
 
       const errorConfig = err.config || {};
-      const errorMessage = err.message
-        + (errorConfig.method != null ? `; Method: ${errorConfig.method}` : '')
-        + (errorConfig.data != null ? `; Request data length: ${
-          errorConfig.data.length
-        }; Request data: ${JSON.stringify(errorConfig.data)}` : '');
+      const errorMessage =
+        err.message +
+        (errorConfig.method != null ? `; Method: ${errorConfig.method}` : "") +
+        (errorConfig.data != null
+          ? `; Request data length: ${errorConfig.data.length}; Request data: ${JSON.stringify(
+              errorConfig.data
+            )}`
+          : "");
 
       ctx.logger.error(`Axios error in "handlers_default.js": ${errorMessage}`);
     });

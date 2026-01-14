@@ -53,7 +53,7 @@ if (require.main === module) {
 
   const logFormatter = winston.format.combine(
     cleanSecrets({ secrets: webhookTokens }),
-    winston.format.json(),
+    winston.format.json()
   );
   const transport = new winston.transports.Console({
     format: logFormatter,
@@ -89,7 +89,7 @@ function toInteger(value) {
 
   const strValue = value.toString().trim();
 
-  if (strValue === '') {
+  if (strValue === "") {
     return null;
   }
 
