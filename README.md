@@ -67,7 +67,8 @@ slack_mentions: U123,U456,@here
 
 #### Slack tables limit
 
-Slack tables are chunked by `MAX_TABLE_ROWS` (default 50, max 100):
+Slack tables are chunked by `MAX_TABLE_ROWS` (default 50, max 70). Values above 70 are clamped to
+avoid Slack payload failures:
 
 ```yaml
 environment:
