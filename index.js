@@ -24,8 +24,8 @@ let maxTableRows = toInteger(process.env.MAX_TABLE_ROWS) || 50;
 if (maxTableRows <= 0) {
   maxTableRows = 50;
 }
-if (maxTableRows >= 100) {
-  maxTableRows = 99;
+if (maxTableRows > 70) {
+  maxTableRows = 70;
 }
 
 const configPath = "/etc/alertmanager-discord.yml";
