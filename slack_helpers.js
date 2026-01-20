@@ -1,24 +1,42 @@
 const SPECIAL_MENTIONS = new Set(["@here", "@channel", "@everyone"]);
 
-const logSlackResponse = (ctx, response) => {
-  ctx.logger.info(`Slack webhook responded with status ${response.status}`);
+const logSlackResponse = (ctx, response, messageContext) => {
+  const { messageIndex, totalMessages, blocksCount, alertsCount } = messageContext || {};
+  const indexInfo =
+    messageIndex != null && totalMessages != null
+      ? `message ${messageIndex + 1}/${totalMessages}, `
+      : "";
+  const blocksInfo = blocksCount != null ? `${blocksCount} blocks, ` : "";
+  const alertsInfo = alertsCount != null ? `${alertsCount} alert(s)` : "";
+  ctx.logger.info(
+    `Slack webhook responded with status ${response.status} (${indexInfo}${blocksInfo}${alertsInfo})`
+  );
 };
 
-const logSlackError = (ctx, err) => {
+const logSlackError = (ctx, err, messageContext) => {
+  const { messageIndex, totalMessages, blocksCount, alertsCount } = messageContext || {};
+  const indexInfo =
+    messageIndex != null && totalMessages != null
+      ? `message ${messageIndex + 1}/${totalMessages}, `
+      : "";
+  const blocksInfo = blocksCount != null ? `${blocksCount} blocks, ` : "";
+  const alertsInfo = alertsCount != null ? `${alertsCount} alert(s)` : "";
+  const contextSuffix = ` (${indexInfo}${blocksInfo}${alertsInfo})`;
+
   const status = err.response?.status;
   if (status != null) {
     const body = err.response?.data;
     ctx.logger.error(
       `Slack webhook responded with status ${status}${
         body != null ? `; Body: ${JSON.stringify(body)}` : ""
-      }`
+      }${contextSuffix}`
     );
     ctx.status = 500;
     return;
   }
 
   ctx.status = 500;
-  ctx.logger.error(`Slack webhook error: ${err.message}`);
+  ctx.logger.error(`Slack webhook error: ${err.message}${contextSuffix}`);
 };
 
 const convertMarkdownToSlack = (text) => {

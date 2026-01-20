@@ -62,6 +62,9 @@ async function handleHook(ctx) {
     return;
   }
 
+  const alertsCount = ctx.request.body.alerts.length;
+  ctx.logger.info(`Received ${alertsCount} alert(s) from Alertmanager`);
+
   const units = [];
   const grouped = groupBy(ctx.request.body.alerts, (alert) => alert.status);
 
@@ -208,14 +211,29 @@ async function handleHook(ctx) {
 
   flushCurrent();
 
-  for (const message of messages) {
-    await axios
-      .post(hook, { text: "", blocks: message.blocks })
-      .then((response) => logSlackResponse(ctx, response))
-      .catch((err) => logSlackError(ctx, err));
+  for (let i = 0; i < messages.length; i++) {
+    const message = messages[i];
+    const messageContext = {
+      messageIndex: i,
+      totalMessages: messages.length,
+      blocksCount: message.blocks.length,
+      alertsCount,
+    };
+
+    try {
+      const response = await axios.post(hook, {
+        text: "",
+        blocks: message.blocks,
+      });
+      logSlackResponse(ctx, response, messageContext);
+    } catch (err) {
+      logSlackError(ctx, err, messageContext);
+    }
   }
 
-  ctx.logger.info(`${messages.length} messages have been sent`);
+  ctx.logger.info(
+    `${messages.length} message(s) sent from ${units.length} unit(s), ${alertsCount} alert(s)`
+  );
 }
 
 module.exports = {
