@@ -1,27 +1,33 @@
 const SPECIAL_MENTIONS = new Set(["@here", "@channel", "@everyone"]);
 
+const formatSlackMessageContext = (messageContext) => {
+  if (!messageContext) {
+    return "";
+  }
+
+  const { messageIndex, totalMessages, blocksCount, alertsCount } = messageContext;
+  const parts = [];
+
+  if (messageIndex != null && totalMessages != null) {
+    parts.push(`message ${messageIndex + 1}/${totalMessages}`);
+  }
+  if (blocksCount != null) {
+    parts.push(`${blocksCount} blocks`);
+  }
+  if (alertsCount != null) {
+    parts.push(`${alertsCount} alert(s)`);
+  }
+
+  return parts.length ? ` (${parts.join(", ")})` : "";
+};
+
 const logSlackResponse = (ctx, response, messageContext) => {
-  const { messageIndex, totalMessages, blocksCount, alertsCount } = messageContext || {};
-  const indexInfo =
-    messageIndex != null && totalMessages != null
-      ? `message ${messageIndex + 1}/${totalMessages}, `
-      : "";
-  const blocksInfo = blocksCount != null ? `${blocksCount} blocks, ` : "";
-  const alertsInfo = alertsCount != null ? `${alertsCount} alert(s)` : "";
-  ctx.logger.info(
-    `Slack webhook responded with status ${response.status} (${indexInfo}${blocksInfo}${alertsInfo})`
-  );
+  const contextSuffix = formatSlackMessageContext(messageContext);
+  ctx.logger.info(`Slack webhook responded with status ${response.status}${contextSuffix}`);
 };
 
 const logSlackError = (ctx, err, messageContext) => {
-  const { messageIndex, totalMessages, blocksCount, alertsCount } = messageContext || {};
-  const indexInfo =
-    messageIndex != null && totalMessages != null
-      ? `message ${messageIndex + 1}/${totalMessages}, `
-      : "";
-  const blocksInfo = blocksCount != null ? `${blocksCount} blocks, ` : "";
-  const alertsInfo = alertsCount != null ? `${alertsCount} alert(s)` : "";
-  const contextSuffix = ` (${indexInfo}${blocksInfo}${alertsInfo})`;
+  const contextSuffix = formatSlackMessageContext(messageContext);
 
   const status = err.response?.status;
   if (status != null) {
