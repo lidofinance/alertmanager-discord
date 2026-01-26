@@ -1,3 +1,5 @@
+const { Lexer } = require("marked");
+
 const SPECIAL_MENTIONS = new Set(["@here", "@channel", "@everyone"]);
 
 const formatSlackMessageContext = (messageContext) => {
@@ -45,12 +47,74 @@ const logSlackError = (ctx, err, messageContext) => {
   ctx.logger.error(`Slack webhook error: ${err.message}${contextSuffix}`);
 };
 
+const collectPlainText = (tokens) => {
+  if (!tokens || !tokens.length) {
+    return "";
+  }
+
+  return tokens
+    .map((token) => {
+      if (token.type === "text" || token.type === "escape") {
+        return token.text;
+      }
+      if (token.type === "strong" || token.type === "em" || token.type === "del") {
+        return collectPlainText(token.tokens || []);
+      }
+      if (token.type === "link") {
+        return collectPlainText(token.tokens || []) || token.text || "";
+      }
+      if (token.type === "codespan") {
+        return token.text;
+      }
+      if (token.type === "br") {
+        return "\n";
+      }
+      return token.text || token.raw || "";
+    })
+    .join("");
+};
+
+const renderSlackMrkdwn = (tokens) => {
+  if (!tokens || !tokens.length) {
+    return "";
+  }
+
+  return tokens
+    .map((token) => {
+      if (token.type === "text" || token.type === "escape") {
+        return token.text;
+      }
+      if (token.type === "strong") {
+        return `*${renderSlackMrkdwn(token.tokens || [])}*`;
+      }
+      if (token.type === "em") {
+        return `_${renderSlackMrkdwn(token.tokens || [])}_`;
+      }
+      if (token.type === "del") {
+        return `~${renderSlackMrkdwn(token.tokens || [])}~`;
+      }
+      if (token.type === "codespan") {
+        return `\`${token.text}\``;
+      }
+      if (token.type === "link") {
+        const linkText = collectPlainText(token.tokens || []) || token.text || "";
+        return `<${token.href}|${linkText}>`;
+      }
+      if (token.type === "br") {
+        return "\n";
+      }
+      return token.text || token.raw || "";
+    })
+    .join("");
+};
+
 const convertMarkdownToSlack = (text) => {
   if (!text) {
     return "";
   }
 
-  return text.replace(/\*\*(.+?)\*\*/g, "*$1*").replace(/\[([^\]]+)\]\(([^)]+)\)/g, "<$2|$1>");
+  const tokens = Lexer.lexInline(String(text));
+  return renderSlackMrkdwn(tokens);
 };
 
 const formatSlackMention = (mention) => {
@@ -87,34 +151,37 @@ const parseRichTextElements = (text) => {
     return [{ type: "text", text: "" }];
   }
 
-  const elements = [];
-  const tokenPattern = /(\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g;
-  let lastIndex = 0;
-  let match;
-
-  while ((match = tokenPattern.exec(content)) !== null) {
-    if (match.index > lastIndex) {
-      elements.push({ type: "text", text: content.slice(lastIndex, match.index) });
-    }
-
-    const token = match[0];
-    if (token.startsWith("**")) {
-      elements.push({ type: "text", text: token.slice(2, -2), style: { bold: true } });
-    } else {
-      const linkMatch = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(token);
-      if (linkMatch) {
-        elements.push({ type: "link", url: linkMatch[2], text: linkMatch[1] });
-      } else {
-        elements.push({ type: "text", text: token });
+  const tokens = Lexer.lexInline(content);
+  const elements = tokens
+    .map((token) => {
+      if (token.type === "text" || token.type === "escape") {
+        return { type: "text", text: token.text };
       }
-    }
-
-    lastIndex = match.index + token.length;
-  }
-
-  if (lastIndex < content.length) {
-    elements.push({ type: "text", text: content.slice(lastIndex) });
-  }
+      if (token.type === "strong") {
+        return { type: "text", text: collectPlainText(token.tokens || []), style: { bold: true } };
+      }
+      if (token.type === "em") {
+        return { type: "text", text: collectPlainText(token.tokens || []), style: { italic: true } };
+      }
+      if (token.type === "del") {
+        return { type: "text", text: collectPlainText(token.tokens || []), style: { strike: true } };
+      }
+      if (token.type === "codespan") {
+        return { type: "text", text: token.text, style: { code: true } };
+      }
+      if (token.type === "link") {
+        return {
+          type: "link",
+          url: token.href,
+          text: collectPlainText(token.tokens || []) || token.text || "",
+        };
+      }
+      if (token.type === "br") {
+        return { type: "text", text: "\n" };
+      }
+      return { type: "text", text: token.text || token.raw || "" };
+    })
+    .filter((element) => element.text !== "" || element.type !== "text");
 
   return elements.length ? elements : [{ type: "text", text: "" }];
 };
