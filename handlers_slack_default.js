@@ -22,6 +22,11 @@ const buildBlocks = (alert, logger) => {
   const title = convertMarkdownToSlack(compileTitle(alert) || summary || "");
   const descr = convertMarkdownToSlack(compileDescr(alert) || description || "");
 
+  const mentions = getSlackMentions(alert.labels || {});
+  if (mentions.length) {
+    blocks.push(buildSectionBlock(mentions.join(" ")));
+  }
+
   const titleBlock = buildSectionBlock(title);
   if (titleBlock) {
     blocks.push(titleBlock);
@@ -30,11 +35,6 @@ const buildBlocks = (alert, logger) => {
   const descrBlock = buildSectionBlock(descr);
   if (descrBlock) {
     blocks.push(descrBlock);
-  }
-
-  const mentions = getSlackMentions(alert.labels || {});
-  if (mentions.length) {
-    blocks.push(buildSectionBlock(mentions.join(" ")));
   }
 
   const fields = getFields(alert, logger);

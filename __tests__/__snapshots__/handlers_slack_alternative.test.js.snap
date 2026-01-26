@@ -8,6 +8,13 @@ Array [
       "blocks": Array [
         Object {
           "text": Object {
+            "text": "<@U1> <@U2> @here",
+            "type": "mrkdwn",
+          },
+          "type": "section",
+        },
+        Object {
+          "text": Object {
             "text": "2 Resolved Summary",
             "type": "mrkdwn",
           },
@@ -16,13 +23,6 @@ Array [
         Object {
           "text": Object {
             "text": "Resolved Description",
-            "type": "mrkdwn",
-          },
-          "type": "section",
-        },
-        Object {
-          "text": Object {
-            "text": "<@U1> <@U2> @here",
             "type": "mrkdwn",
           },
           "type": "section",
@@ -178,6 +178,13 @@ Array [
       "blocks": Array [
         Object {
           "text": Object {
+            "text": "<@U3> <@U4>",
+            "type": "mrkdwn",
+          },
+          "type": "section",
+        },
+        Object {
+          "text": Object {
             "text": "<https://example.com/fire|2 Summary>",
             "type": "mrkdwn",
           },
@@ -186,13 +193,6 @@ Array [
         Object {
           "text": Object {
             "text": "Description",
-            "type": "mrkdwn",
-          },
-          "type": "section",
-        },
-        Object {
-          "text": Object {
-            "text": "<@U3> <@U4>",
             "type": "mrkdwn",
           },
           "type": "section",
