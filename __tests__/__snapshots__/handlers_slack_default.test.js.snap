@@ -8,6 +8,13 @@ Array [
       "blocks": Array [
         Object {
           "text": Object {
+            "text": "<@U123> @here <@U456>",
+            "type": "mrkdwn",
+          },
+          "type": "section",
+        },
+        Object {
+          "text": Object {
             "text": "*Bold summary*",
             "type": "mrkdwn",
           },
@@ -16,13 +23,6 @@ Array [
         Object {
           "text": Object {
             "text": "See <https://example.com|link>",
-            "type": "mrkdwn",
-          },
-          "type": "section",
-        },
-        Object {
-          "text": Object {
-            "text": "<@U123> @here <@U456>",
             "type": "mrkdwn",
           },
           "type": "section",

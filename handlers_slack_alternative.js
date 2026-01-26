@@ -105,14 +105,14 @@ async function handleHook(ctx) {
         });
 
         const blocks = [];
+        if (mentions.size) {
+          blocks.push(buildSectionBlock([...mentions].join(" ")));
+        }
         if (titleBlock) {
           blocks.push(titleBlock);
         }
         if (descrBlock) {
           blocks.push(descrBlock);
-        }
-        if (mentions.size) {
-          blocks.push(buildSectionBlock([...mentions].join(" ")));
         }
 
         const rows = chunk.map((alert) => ({
@@ -177,7 +177,7 @@ async function handleHook(ctx) {
     }
 
     if (current.mentions.size) {
-      current.blocks.push(buildSectionBlock([...current.mentions].join(" ")));
+      current.blocks.unshift(buildSectionBlock([...current.mentions].join(" ")));
     }
     messages.push({ blocks: current.blocks });
     current = null;
