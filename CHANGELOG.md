@@ -1,3 +1,12 @@
+## [2.9.1](https://github.com/lidofinance/alertmanager-discord/compare/2.9.0...2.9.1) (2026-01-28)
+
+
+### Bug Fixes
+
+* update Node.js to the latest major version ([1d3691d](https://github.com/lidofinance/alertmanager-discord/commit/1d3691da5c65c3d8a403272fa23aa33ac984e26f))
+
+
+
 # [2.9.0](https://github.com/lidofinance/alertmanager-discord/compare/2.8.0...2.9.0) (2025-08-06)
 
 
@@ -101,10 +110,6 @@
 ### Bug Fixes
 
 * webhook regexp ([#11](https://github.com/lidofinance/alertmanager-discord/issues/11)) ([13dff2e](https://github.com/lidofinance/alertmanager-discord/commit/13dff2ed21720f84147c16f2d1f986328773fed3))
-
-
-
-## [2.1.2](https://github.com/lidofinance/alertmanager-discord/compare/2.1.1...2.1.2) (2022-05-05)
 
 
 
