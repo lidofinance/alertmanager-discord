@@ -29,60 +29,94 @@ Array [
         },
         Object {
           "rows": Array [
-            Object {
-              "cells": Array [
-                Object {
-                  "text": "1",
-                  "type": "raw_text",
-                },
-                Object {
-                  "text": "name1",
-                  "type": "raw_text",
-                },
-                Object {
-                  "elements": Array [
-                    Object {
-                      "elements": Array [
-                        Object {
-                          "text": "value1",
-                          "type": "text",
-                        },
-                      ],
-                      "type": "rich_text_section",
-                    },
-                  ],
-                  "type": "rich_text",
-                },
-              ],
-              "type": "table_row",
-            },
-            Object {
-              "cells": Array [
-                Object {
-                  "text": "2",
-                  "type": "raw_text",
-                },
-                Object {
-                  "text": "name2",
-                  "type": "raw_text",
-                },
-                Object {
-                  "elements": Array [
-                    Object {
-                      "elements": Array [
-                        Object {
-                          "text": "value2",
-                          "type": "text",
-                        },
-                      ],
-                      "type": "rich_text_section",
-                    },
-                  ],
-                  "type": "rich_text",
-                },
-              ],
-              "type": "table_row",
-            },
+            Array [
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "1",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "name1",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "value1",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+            ],
+            Array [
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "2",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "name2",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "value2",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+            ],
           ],
           "type": "table",
         },
@@ -124,33 +158,50 @@ Array [
         },
         Object {
           "rows": Array [
-            Object {
-              "cells": Array [
-                Object {
-                  "text": "1",
-                  "type": "raw_text",
-                },
-                Object {
-                  "text": "name3",
-                  "type": "raw_text",
-                },
-                Object {
-                  "elements": Array [
-                    Object {
-                      "elements": Array [
-                        Object {
-                          "text": "value3",
-                          "type": "text",
-                        },
-                      ],
-                      "type": "rich_text_section",
-                    },
-                  ],
-                  "type": "rich_text",
-                },
-              ],
-              "type": "table_row",
-            },
+            Array [
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "1",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "name3",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "value3",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+            ],
           ],
           "type": "table",
         },
@@ -199,60 +250,94 @@ Array [
         },
         Object {
           "rows": Array [
-            Object {
-              "cells": Array [
-                Object {
-                  "text": "1",
-                  "type": "raw_text",
-                },
-                Object {
-                  "text": "name4",
-                  "type": "raw_text",
-                },
-                Object {
-                  "elements": Array [
-                    Object {
-                      "elements": Array [
-                        Object {
-                          "text": "value4",
-                          "type": "text",
-                        },
-                      ],
-                      "type": "rich_text_section",
-                    },
-                  ],
-                  "type": "rich_text",
-                },
-              ],
-              "type": "table_row",
-            },
-            Object {
-              "cells": Array [
-                Object {
-                  "text": "2",
-                  "type": "raw_text",
-                },
-                Object {
-                  "text": "name5",
-                  "type": "raw_text",
-                },
-                Object {
-                  "elements": Array [
-                    Object {
-                      "elements": Array [
-                        Object {
-                          "text": "value5",
-                          "type": "text",
-                        },
-                      ],
-                      "type": "rich_text_section",
-                    },
-                  ],
-                  "type": "rich_text",
-                },
-              ],
-              "type": "table_row",
-            },
+            Array [
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "1",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "name4",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "value4",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+            ],
+            Array [
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "2",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "name5",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "value5",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+            ],
           ],
           "type": "table",
         },
