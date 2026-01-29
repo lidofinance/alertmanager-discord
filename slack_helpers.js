@@ -161,10 +161,18 @@ const parseRichTextElements = (text) => {
         return { type: "text", text: collectPlainText(token.tokens || []), style: { bold: true } };
       }
       if (token.type === "em") {
-        return { type: "text", text: collectPlainText(token.tokens || []), style: { italic: true } };
+        return {
+          type: "text",
+          text: collectPlainText(token.tokens || []),
+          style: { italic: true },
+        };
       }
       if (token.type === "del") {
-        return { type: "text", text: collectPlainText(token.tokens || []), style: { strike: true } };
+        return {
+          type: "text",
+          text: collectPlainText(token.tokens || []),
+          style: { strike: true },
+        };
       }
       if (token.type === "codespan") {
         return { type: "text", text: token.text, style: { code: true } };
@@ -218,14 +226,11 @@ const buildTableBlock = (rows) => {
   return {
     type: "table",
     rows: rows.map((row, index) => {
-      return {
-        type: "table_row",
-        cells: [
-          { type: "raw_text", text: String(index + 1) },
-          { type: "raw_text", text: row.field_name || "" },
-          buildRichTextCell(row.field_value || ""),
-        ],
-      };
+      return [
+        buildRichTextCell(String(index + 1)),
+        buildRichTextCell(row.field_name),
+        buildRichTextCell(row.field_value),
+      ];
     }),
   };
 };
