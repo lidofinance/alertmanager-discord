@@ -1,5 +1,4 @@
 const axios = require("axios");
-const { compileTitle, compileDescr } = require("./templating");
 const marked = require("marked");
 
 const colors = { firing: 0xd50000, resolved: 0x00c853, default: 0x333333 };
@@ -78,12 +77,7 @@ function transformFieldsList(list) {
 async function handleHook(ctx) {
   ctx.status = 200;
 
-  let hook = ctx.routes[ctx.params.slug];
-  if (hook === undefined) {
-    ctx.status = 404;
-    ctx.logger.warn(`Slug "${ctx.params.slug}" was not found in routes`);
-    return;
-  }
+  const hook = ctx.state.hook;
 
   if (ctx.request.body === undefined || !Array.isArray(ctx.request.body.alerts)) {
     ctx.status = 400;
@@ -102,8 +96,8 @@ async function handleHook(ctx) {
       let body = {
         embeds: [
           {
-            title: compileTitle(alert) || summary,
-            description: compileDescr(alert) || description,
+            title: summary,
+            description: description,
             color: colors[alert.status] || colors.default,
           },
         ],
@@ -128,7 +122,11 @@ async function handleHook(ctx) {
 
   if (!objectsToSend.length) {
     ctx.status = 400;
-    ctx.logger.warn(`Nothing to send, all alerts has been filtered out. Received data: ${JSON.stringify(ctx.request.body.alerts)}`);
+    ctx.logger.warn(
+      `Nothing to send, all alerts has been filtered out. Received data: ${JSON.stringify(
+        ctx.request.body.alerts
+      )}`
+    );
     return;
   }
 
@@ -137,11 +135,14 @@ async function handleHook(ctx) {
       ctx.status = 500;
 
       const errorConfig = err.config || {};
-      const errorMessage = err.message
-        + (errorConfig.method != null ? `; Method: ${errorConfig.method}` : '')
-        + (errorConfig.data != null ? `; Request data length: ${
-          errorConfig.data.length
-        }; Request data: ${JSON.stringify(errorConfig.data)}` : '');
+      const errorMessage =
+        err.message +
+        (errorConfig.method != null ? `; Method: ${errorConfig.method}` : "") +
+        (errorConfig.data != null
+          ? `; Request data length: ${errorConfig.data.length}; Request data: ${JSON.stringify(
+              errorConfig.data
+            )}`
+          : "");
 
       ctx.logger.error(`Axios error in "handlers_default.js": ${errorMessage}`);
     });
@@ -150,39 +151,8 @@ async function handleHook(ctx) {
   ctx.logger.info(`${objectsToSend.length} objects have been sent`);
 }
 
-async function handleHealthcheck(ctx) {
-  let hook;
-
-  for (const key in ctx.routes) {
-    hook = ctx.routes[key];
-    break;
-  }
-
-  if (hook === undefined) {
-    ctx.logger.warn("No routes has been configured!");
-    ctx.status = 503;
-    return;
-  }
-
-  await axios
-    .get(hook)
-    .then(() => {
-      ctx.status = 200;
-      ctx.body = { uptime: process.uptime() };
-    })
-    .catch((err) => {
-      ctx.status = 503;
-      if (err.response && err.response.data) {
-        ctx.logger.error(`handleHealthcheck: ${JSON.stringify(err.response.data)}`);
-      } else {
-        ctx.logger.error(`handleHealthcheck: ${err.message}`);
-      }
-    });
-}
-
 module.exports = {
   handleHook,
-  handleHealthcheck,
   getMentions,
   getFields,
 };

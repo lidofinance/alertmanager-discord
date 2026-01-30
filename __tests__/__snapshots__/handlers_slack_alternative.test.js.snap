@@ -1,0 +1,363 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`hook works (table chunking, resolved first) 1`] = `
+Array [
+  Array [
+    "/dev/null",
+    Object {
+      "blocks": Array [
+        Object {
+          "text": Object {
+            "text": "<@U1> <@U2> @here",
+            "type": "mrkdwn",
+          },
+          "type": "section",
+        },
+        Object {
+          "text": Object {
+            "text": "2 Resolved Summary",
+            "type": "mrkdwn",
+          },
+          "type": "section",
+        },
+        Object {
+          "text": Object {
+            "text": "Resolved Description",
+            "type": "mrkdwn",
+          },
+          "type": "section",
+        },
+        Object {
+          "rows": Array [
+            Array [
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "1",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "name1",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "value1",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+            ],
+            Array [
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "2",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "name2",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "value2",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+            ],
+          ],
+          "type": "table",
+        },
+        Object {
+          "elements": Array [
+            Object {
+              "alt_text": "footer icon",
+              "image_url": "https://example.com/icon.png",
+              "type": "image",
+            },
+            Object {
+              "text": "Footer",
+              "type": "mrkdwn",
+            },
+          ],
+          "type": "context",
+        },
+      ],
+      "text": "",
+    },
+  ],
+  Array [
+    "/dev/null",
+    Object {
+      "blocks": Array [
+        Object {
+          "text": Object {
+            "text": "1 Resolved Summary",
+            "type": "mrkdwn",
+          },
+          "type": "section",
+        },
+        Object {
+          "text": Object {
+            "text": "Resolved Description",
+            "type": "mrkdwn",
+          },
+          "type": "section",
+        },
+        Object {
+          "rows": Array [
+            Array [
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "1",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "name3",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "value3",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+            ],
+          ],
+          "type": "table",
+        },
+        Object {
+          "elements": Array [
+            Object {
+              "alt_text": "footer icon",
+              "image_url": "https://example.com/icon.png",
+              "type": "image",
+            },
+            Object {
+              "text": "Footer",
+              "type": "mrkdwn",
+            },
+          ],
+          "type": "context",
+        },
+      ],
+      "text": "",
+    },
+  ],
+  Array [
+    "/dev/null",
+    Object {
+      "blocks": Array [
+        Object {
+          "text": Object {
+            "text": "<@U3> <@U4>",
+            "type": "mrkdwn",
+          },
+          "type": "section",
+        },
+        Object {
+          "text": Object {
+            "text": "<https://example.com/fire|2 Summary>",
+            "type": "mrkdwn",
+          },
+          "type": "section",
+        },
+        Object {
+          "text": Object {
+            "text": "Description",
+            "type": "mrkdwn",
+          },
+          "type": "section",
+        },
+        Object {
+          "rows": Array [
+            Array [
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "1",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "name4",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "value4",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+            ],
+            Array [
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "2",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "name5",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+              Object {
+                "elements": Array [
+                  Object {
+                    "elements": Array [
+                      Object {
+                        "text": "value5",
+                        "type": "text",
+                      },
+                    ],
+                    "type": "rich_text_section",
+                  },
+                ],
+                "type": "rich_text",
+              },
+            ],
+          ],
+          "type": "table",
+        },
+        Object {
+          "elements": Array [
+            Object {
+              "alt_text": "footer icon",
+              "image_url": "https://example.com/icon.png",
+              "type": "image",
+            },
+            Object {
+              "text": "Footer",
+              "type": "mrkdwn",
+            },
+          ],
+          "type": "context",
+        },
+      ],
+      "text": "",
+    },
+  ],
+]
+`;
