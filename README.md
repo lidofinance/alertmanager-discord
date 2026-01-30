@@ -75,23 +75,6 @@ environment:
   MAX_TABLE_ROWS: 50
 ```
 
-#### Title and description templating
-
-Provide `TITLE_TMPL` and `DESCR_TMPL` to override title and/or description, e.g. in docker-compose:
-
-```yaml
-environment:
-  TITLE_TMPL: >
-    {{@if(it.status==='resolved'}}
-    {{it.annotations.onResolved|d('')}}
-    {{/if}}
-```
-
-If template is evaluating to an empty string, `annotations.summary` and `annotations.description` fields
-will be used for title and description respectivelly.
-
-Look at [squirrelly](https://squirrelly.js.org) docs for templating reference.
-
 #### Inline fields
 
 Provide `inline_fields` alert's annotation to insert inline fields in Discord or a Slack rich_text bullet list

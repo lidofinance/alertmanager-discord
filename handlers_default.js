@@ -1,5 +1,4 @@
 const axios = require("axios");
-const { compileTitle, compileDescr } = require("./templating");
 const marked = require("marked");
 
 const colors = { firing: 0xd50000, resolved: 0x00c853, default: 0x333333 };
@@ -97,8 +96,8 @@ async function handleHook(ctx) {
       let body = {
         embeds: [
           {
-            title: compileTitle(alert) || summary,
-            description: compileDescr(alert) || description,
+            title: summary,
+            description: description,
             color: colors[alert.status] || colors.default,
           },
         ],
