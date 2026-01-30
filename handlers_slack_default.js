@@ -1,5 +1,4 @@
 const axios = require("axios");
-const { compileTitle, compileDescr } = require("./templating");
 const { getFields } = require("./handlers_default");
 const {
   buildContextBlock,
@@ -19,8 +18,8 @@ const buildBlocks = (alert, logger) => {
   }
 
   const blocks = [];
-  const title = convertMarkdownToSlack(compileTitle(alert) || summary || "");
-  const descr = convertMarkdownToSlack(compileDescr(alert) || description || "");
+  const title = convertMarkdownToSlack(summary);
+  const descr = convertMarkdownToSlack(description);
 
   const mentions = getSlackMentions(alert.labels || {});
   if (mentions.length) {
