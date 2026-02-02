@@ -1,59 +1,12 @@
 const axios = require("axios");
-const { getFields } = require("./handlers_default");
 const {
   buildContextBlock,
-  buildRichTextListBlock,
-  buildSectionBlock,
-  convertMarkdownToSlack,
   getSlackMentions,
   logSlackError,
   logSlackResponse,
 } = require("./slack_helpers");
-
-const buildBlocks = (alert, logger) => {
-  const description = alert.annotations?.description;
-  const summary = alert.annotations?.summary;
-  if (!summary && !description) {
-    return null;
-  }
-
-  const blocks = [];
-  const title = convertMarkdownToSlack(summary);
-  const descr = convertMarkdownToSlack(description);
-
-  const mentions = getSlackMentions(alert.labels || {});
-  if (mentions.length) {
-    blocks.push(buildSectionBlock(mentions.join(" ")));
-  }
-
-  const titleBlock = buildSectionBlock(title);
-  if (titleBlock) {
-    blocks.push(titleBlock);
-  }
-
-  const descrBlock = buildSectionBlock(descr);
-  if (descrBlock) {
-    blocks.push(descrBlock);
-  }
-
-  const fields = getFields(alert, logger);
-  if (fields.length) {
-    const listItems = fields.map((field) => String(field.value || "")).filter((value) => value);
-    if (listItems.length) {
-      blocks.push(buildRichTextListBlock(listItems));
-    }
-  }
-
-  const footerBlock = buildContextBlock(
-    alert.annotations?.footer_text,
-    alert.annotations?.footer_icon_url
-  );
-  if (footerBlock) {
-    blocks.push(footerBlock);
-  }
-
-  return blocks;
-};
+const blockKit = require("./block_kit");
+const { markdownToRich } = require("./markdown_to_rich");
 
 async function handleHook(ctx) {
   ctx.status = 200;
@@ -66,18 +19,36 @@ async function handleHook(ctx) {
     return;
   }
 
-  const objectsToSend = [];
-
-  ctx.request.body.alerts.forEach((alert) => {
+  const objectsToSend = ctx.request.body.alerts.flatMap((alert, index) => {
     try {
-      const blocks = buildBlocks(alert, ctx.logger);
-      if (!blocks || !blocks.length) {
-        return;
+      const description = alert.annotations?.description;
+      const summary = alert.annotations?.summary;
+
+      if (!summary && !description) {
+        ctx.logger.warn(`Skip alert with index ${index}: empty 'summary' and 'description'`);
+        return [];
       }
 
-      objectsToSend.push({ text: "", blocks });
+      const mentions = getSlackMentions(alert.labels || {}).join(" ");
+      const allMarkdown = [summary, description, alert.annotations?.inline_fields]
+        .filter(Boolean)
+        .join("\n");
+      const footerBlock = buildContextBlock(
+        alert.annotations?.footer_text,
+        alert.annotations?.footer_icon_url
+      );
+
+      const blocks = [
+        mentions.length > 0 && blockKit.section(mentions),
+        markdownToRich(allMarkdown),
+        footerBlock,
+      ].filter(Boolean);
+
+      return [{ text: "", blocks }];
     } catch (err) {
+      ctx.logger.error(`Skip alert with index ${index}: ${err.message}`);
       ctx.logger.error(err.stack);
+      return [];
     }
   });
 
@@ -91,14 +62,20 @@ async function handleHook(ctx) {
     return;
   }
 
+  let sent = 0;
   for (const body of objectsToSend) {
-    await axios
-      .post(hook, body, { params: ctx.query })
-      .then((response) => logSlackResponse(ctx, response))
-      .catch((err) => logSlackError(ctx, err));
+    try {
+      const response = await axios.post(hook, body);
+      logSlackResponse(ctx, response);
+      sent += 1;
+    } catch (err) {
+      logSlackError(ctx, err);
+    }
   }
 
-  ctx.logger.info(`${objectsToSend.length} objects have been sent`);
+  ctx.logger.info(
+    `${sent}/${objectsToSend.length}/${ctx.request.body.alerts.length} objects have been sent`
+  );
 }
 
 module.exports = {

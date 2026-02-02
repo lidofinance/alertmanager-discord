@@ -14,22 +14,31 @@ Array [
           "type": "section",
         },
         Object {
-          "text": Object {
-            "text": "*Bold summary*",
-            "type": "mrkdwn",
-          },
-          "type": "section",
-        },
-        Object {
-          "text": Object {
-            "text": "See <https://example.com|link>",
-            "type": "mrkdwn",
-          },
-          "type": "section",
-        },
-        Object {
           "elements": Array [
             Object {
+              "elements": Array [
+                Object {
+                  "style": Object {
+                    "bold": true,
+                  },
+                  "text": "Bold summary",
+                  "type": "text",
+                },
+                Object {
+                  "text": "
+See ",
+                  "type": "text",
+                },
+                Object {
+                  "text": "link",
+                  "type": "link",
+                  "url": "https://example.com",
+                },
+              ],
+              "type": "rich_text_section",
+            },
+            Object {
+              "border": 0,
               "elements": Array [
                 Object {
                   "elements": Array [
@@ -54,6 +63,8 @@ Array [
                   "type": "rich_text_section",
                 },
               ],
+              "indent": 0,
+              "offset": 0,
               "style": "bullet",
               "type": "rich_text_list",
             },
@@ -76,9 +87,6 @@ Array [
         },
       ],
       "text": "",
-    },
-    Object {
-      "params": Object {},
     },
   ],
 ]
