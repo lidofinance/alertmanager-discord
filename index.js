@@ -20,8 +20,19 @@ if (maxFieldsLength <= 0 || maxFieldsLength > 25) {
   maxFieldsLength = 25;
 }
 
+let maxTableRows = toInteger(process.env.MAX_TABLE_ROWS) || 50;
+if (maxTableRows <= 0) {
+  maxTableRows = 50;
+}
+if (maxTableRows > 70) {
+  maxTableRows = 70;
+}
+
 const configPath = "/etc/alertmanager-discord.yml";
-const hookRegExp = new RegExp("https://discord(?:app)?.com/api/webhooks/[0-9]+/[a-zA-Z0-9_-]+");
+const discordHookRegExp = new RegExp(
+  "^https://discord(?:app)?\\.com/api/webhooks/[0-9]+/[a-zA-Z0-9_-]+$"
+);
+const slackHookRegExp = new RegExp("^https://hooks\\.slack\\.com/services/[^/]+/[^/]+/[^/]+$");
 
 if (require.main === module) {
   let config,
@@ -34,26 +45,21 @@ if (require.main === module) {
     console.error("Failed to read configuration file:", err.message);
   }
 
-  const webhookSearchPattern = "/api/webhooks/";
-
   if (config !== undefined && config.hooks !== undefined && Array.isArray(config.hooks)) {
-    for (let route of config.hooks) {
-      if (!route.hook || !route.hook.startsWith || !hookRegExp.test(route.hook)) {
-        console.warn("Not a valid discord web hook for slug =", route.slug);
-        continue;
-      }
-
-      routes[route.slug] = route.hook;
-
-      const webhookPatternIndex = route.hook.indexOf(webhookSearchPattern);
-      const webhookToken = route.hook.substring(webhookPatternIndex + webhookSearchPattern.length);
-      webhookTokens.push(webhookToken);
+    try {
+      ({ routes, webhookTokens } = parseRoutes(config.hooks, {
+        discordHookRegExp,
+        slackHookRegExp,
+      }));
+    } catch (err) {
+      console.error(`Invalid configuration: ${err.message}`);
+      process.exit(1);
     }
   }
 
   const logFormatter = winston.format.combine(
     cleanSecrets({ secrets: webhookTokens }),
-    winston.format.json(),
+    winston.format.json()
   );
   const transport = new winston.transports.Console({
     format: logFormatter,
@@ -69,6 +75,7 @@ if (require.main === module) {
   app.context.messageParams = {
     maxEmbedsLength,
     maxFieldsLength,
+    maxTableRows,
   };
   app.use(router.routes());
 
@@ -89,7 +96,7 @@ function toInteger(value) {
 
   const strValue = value.toString().trim();
 
-  if (strValue === '') {
+  if (strValue === "") {
     return null;
   }
 
@@ -100,4 +107,52 @@ function toInteger(value) {
   }
 
   return null;
+}
+
+function parseRoutes(hooks, { discordHookRegExp, slackHookRegExp }) {
+  const routes = {};
+  const webhookTokens = [];
+  const validTypes = new Set(["discord", "slack"]);
+  const webhookSearchPatterns = {
+    discord: "/api/webhooks/",
+    slack: "/services/",
+  };
+
+  for (const route of hooks) {
+    const type = (route.type || "discord").toLowerCase();
+    if (!validTypes.has(type)) {
+      throw new Error(`Unsupported hook type "${route.type}" for slug "${route.slug}"`);
+    }
+
+    if (!route.slug) {
+      throw new Error("Hook entry is missing slug");
+    }
+
+    if (!route.hook || typeof route.hook !== "string") {
+      throw new Error(`Hook entry for slug "${route.slug}" is missing hook URL`);
+    }
+
+    const hookMatches =
+      type === "discord" ? discordHookRegExp.test(route.hook) : slackHookRegExp.test(route.hook);
+
+    if (!hookMatches) {
+      throw new Error(`Invalid ${type} webhook URL for slug "${route.slug}"`);
+    }
+
+    if (routes[route.slug]) {
+      throw new Error(`Duplicate slug "${route.slug}"`);
+    }
+
+    routes[route.slug] = { type, hook: route.hook };
+
+    const webhookPatternIndex = route.hook.indexOf(webhookSearchPatterns[type]);
+    if (webhookPatternIndex !== -1) {
+      const webhookToken = route.hook.substring(
+        webhookPatternIndex + webhookSearchPatterns[type].length
+      );
+      webhookTokens.push(webhookToken);
+    }
+  }
+
+  return { routes, webhookTokens };
 }

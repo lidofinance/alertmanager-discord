@@ -1,0 +1,93 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`hook works (mentions, table, markdown) 1`] = `
+Array [
+  Array [
+    "/dev/null",
+    Object {
+      "blocks": Array [
+        Object {
+          "text": Object {
+            "text": "<@U123> @here <@U456>",
+            "type": "mrkdwn",
+          },
+          "type": "section",
+        },
+        Object {
+          "elements": Array [
+            Object {
+              "elements": Array [
+                Object {
+                  "style": Object {
+                    "bold": true,
+                  },
+                  "text": "Bold summary",
+                  "type": "text",
+                },
+                Object {
+                  "text": "
+See ",
+                  "type": "text",
+                },
+                Object {
+                  "text": "link",
+                  "type": "link",
+                  "url": "https://example.com",
+                },
+              ],
+              "type": "rich_text_section",
+            },
+            Object {
+              "border": 0,
+              "elements": Array [
+                Object {
+                  "elements": Array [
+                    Object {
+                      "style": Object {
+                        "bold": true,
+                      },
+                      "text": "field",
+                      "type": "text",
+                    },
+                  ],
+                  "type": "rich_text_section",
+                },
+                Object {
+                  "elements": Array [
+                    Object {
+                      "text": "value",
+                      "type": "link",
+                      "url": "https://example.com/path",
+                    },
+                  ],
+                  "type": "rich_text_section",
+                },
+              ],
+              "indent": 0,
+              "offset": 0,
+              "style": "bullet",
+              "type": "rich_text_list",
+            },
+          ],
+          "type": "rich_text",
+        },
+        Object {
+          "elements": Array [
+            Object {
+              "alt_text": "footer icon",
+              "image_url": "https://example.com/icon.png",
+              "type": "image",
+            },
+            Object {
+              "text": "Footer *bold*",
+              "type": "mrkdwn",
+            },
+          ],
+          "type": "context",
+        },
+      ],
+      "text": "",
+    },
+  ],
+]
+`;
