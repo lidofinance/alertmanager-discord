@@ -37,7 +37,10 @@ function translateSection(token, styles = {}) {
   const styleArg = hasStyles(newStyles) ? newStyles : undefined;
 
   if (token.type === "link") {
-    return [slack.richLink(token.href, token.text, false, styleArg)];
+    if (!token.href && !token.text) {
+      return [];
+    }
+    return [slack.richLink(token.href, token.text, { style: styleArg })];
   }
   if (token.type === "codespan") {
     return [slack.richText(unescapeHtml(token.text), styleArg)];
@@ -86,7 +89,7 @@ function translateList(token, indent = 0) {
 
   function flushCurrentList() {
     if (currentListItems.length > 0) {
-      result.push(slack.richList(currentListItems, style, indent));
+      result.push(slack.richList(currentListItems, { style, indent }));
       currentListItems = [];
     }
   }
@@ -118,12 +121,25 @@ const TOKEN_HANDLERS = {
   list: translateList,
 };
 
-function markdownToRich(markdown) {
+function markdownToRichElements(markdown) {
   const tokens = new marked.Lexer().lex(markdown);
-  const elements = tokens.flatMap((t) => TOKEN_HANDLERS[t.type]?.(t) ?? []);
-  return slack.rich(...elements);
+  return tokens.flatMap((t) => TOKEN_HANDLERS[t.type]?.(t) ?? []);
+}
+
+function markdownToPlainText(markdown) {
+  const tokens = new marked.Lexer().lex(markdown);
+  return tokens
+    .filter((t) => t.type === "paragraph" || t.type === "heading")
+    .flatMap((t) => t.tokens.flatMap(translatePlainText))
+    .join("");
+}
+
+function markdownToRich(markdown) {
+  return slack.rich(...markdownToRichElements(markdown));
 }
 
 module.exports = {
   markdownToRich,
+  markdownToRichElements,
+  markdownToPlainText,
 };

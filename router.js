@@ -3,8 +3,7 @@ const bodyParser = require("koa-bodyparser");
 
 const { handleHook: handleHookDiscord } = require("./handlers_default");
 const { handleHook: handleHookDiscordAlt } = require("./handlers_alternative");
-const { handleHook: handleHookSlack } = require("./handlers_slack_default");
-const { handleHook: handleHookSlackAlt } = require("./handlers_slack_alternative");
+const { handleHook: handleHookSlack } = require("./handlers_slack");
 const { handleHealthcheck } = require("./healthcheck");
 
 const getHandler = (route, workingMode) => {
@@ -13,7 +12,7 @@ const getHandler = (route, workingMode) => {
   }
 
   if (route.type === "slack") {
-    return workingMode === "alternative" ? handleHookSlackAlt : handleHookSlack;
+    return handleHookSlack;
   }
 
   return workingMode === "alternative" ? handleHookDiscordAlt : handleHookDiscord;

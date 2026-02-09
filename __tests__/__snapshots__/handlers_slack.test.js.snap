@@ -1,5 +1,70 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`hook works (mentions, table, markdown) 1`] = `
+Array [
+  Array [
+    "/dev/null",
+    Object {
+      "blocks": Array [
+        Object {
+          "text": Object {
+            "text": "<@U123> @here <@U456>",
+            "type": "mrkdwn",
+          },
+          "type": "section",
+        },
+        Object {
+          "elements": Array [
+            Object {
+              "elements": Array [
+                Object {
+                  "style": Object {
+                    "bold": true,
+                  },
+                  "text": "Bold summary",
+                  "type": "text",
+                },
+              ],
+              "type": "rich_text_section",
+            },
+            Object {
+              "elements": Array [
+                Object {
+                  "text": "See ",
+                  "type": "text",
+                },
+                Object {
+                  "text": "link",
+                  "type": "link",
+                  "url": "https://example.com",
+                },
+              ],
+              "type": "rich_text_section",
+            },
+          ],
+          "type": "rich_text",
+        },
+        Object {
+          "elements": Array [
+            Object {
+              "text": "Footer **bold**",
+              "type": "mrkdwn",
+            },
+            Object {
+              "alt_text": "footer icon",
+              "image_url": "https://example.com/icon.png",
+              "type": "image",
+            },
+          ],
+          "type": "context",
+        },
+      ],
+      "text": "",
+    },
+  ],
+]
+`;
+
 exports[`hook works (table chunking, resolved first) 1`] = `
 Array [
   Array [
@@ -14,35 +79,34 @@ Array [
           "type": "section",
         },
         Object {
-          "text": Object {
-            "text": "2 Resolved Summary",
-            "type": "mrkdwn",
-          },
-          "type": "section",
-        },
-        Object {
-          "text": Object {
-            "text": "Resolved Description",
-            "type": "mrkdwn",
-          },
-          "type": "section",
+          "elements": Array [
+            Object {
+              "elements": Array [
+                Object {
+                  "text": "Resolved Summary",
+                  "type": "text",
+                },
+              ],
+              "type": "rich_text_section",
+            },
+            Object {
+              "elements": Array [
+                Object {
+                  "text": "Resolved Description",
+                  "type": "text",
+                },
+              ],
+              "type": "rich_text_section",
+            },
+          ],
+          "type": "rich_text",
         },
         Object {
           "rows": Array [
             Array [
               Object {
-                "elements": Array [
-                  Object {
-                    "elements": Array [
-                      Object {
-                        "text": "1",
-                        "type": "text",
-                      },
-                    ],
-                    "type": "rich_text_section",
-                  },
-                ],
-                "type": "rich_text",
+                "text": "1",
+                "type": "raw_text",
               },
               Object {
                 "elements": Array [
@@ -75,18 +139,8 @@ Array [
             ],
             Array [
               Object {
-                "elements": Array [
-                  Object {
-                    "elements": Array [
-                      Object {
-                        "text": "2",
-                        "type": "text",
-                      },
-                    ],
-                    "type": "rich_text_section",
-                  },
-                ],
-                "type": "rich_text",
+                "text": "2",
+                "type": "raw_text",
               },
               Object {
                 "elements": Array [
@@ -123,13 +177,13 @@ Array [
         Object {
           "elements": Array [
             Object {
+              "text": "Footer",
+              "type": "mrkdwn",
+            },
+            Object {
               "alt_text": "footer icon",
               "image_url": "https://example.com/icon.png",
               "type": "image",
-            },
-            Object {
-              "text": "Footer",
-              "type": "mrkdwn",
             },
           ],
           "type": "context",
@@ -143,35 +197,34 @@ Array [
     Object {
       "blocks": Array [
         Object {
-          "text": Object {
-            "text": "1 Resolved Summary",
-            "type": "mrkdwn",
-          },
-          "type": "section",
-        },
-        Object {
-          "text": Object {
-            "text": "Resolved Description",
-            "type": "mrkdwn",
-          },
-          "type": "section",
+          "elements": Array [
+            Object {
+              "elements": Array [
+                Object {
+                  "text": "Resolved Summary",
+                  "type": "text",
+                },
+              ],
+              "type": "rich_text_section",
+            },
+            Object {
+              "elements": Array [
+                Object {
+                  "text": "Resolved Description",
+                  "type": "text",
+                },
+              ],
+              "type": "rich_text_section",
+            },
+          ],
+          "type": "rich_text",
         },
         Object {
           "rows": Array [
             Array [
               Object {
-                "elements": Array [
-                  Object {
-                    "elements": Array [
-                      Object {
-                        "text": "1",
-                        "type": "text",
-                      },
-                    ],
-                    "type": "rich_text_section",
-                  },
-                ],
-                "type": "rich_text",
+                "text": "1",
+                "type": "raw_text",
               },
               Object {
                 "elements": Array [
@@ -208,13 +261,13 @@ Array [
         Object {
           "elements": Array [
             Object {
+              "text": "Footer",
+              "type": "mrkdwn",
+            },
+            Object {
               "alt_text": "footer icon",
               "image_url": "https://example.com/icon.png",
               "type": "image",
-            },
-            Object {
-              "text": "Footer",
-              "type": "mrkdwn",
             },
           ],
           "type": "context",
@@ -235,35 +288,35 @@ Array [
           "type": "section",
         },
         Object {
-          "text": Object {
-            "text": "<https://example.com/fire|2 Summary>",
-            "type": "mrkdwn",
-          },
-          "type": "section",
-        },
-        Object {
-          "text": Object {
-            "text": "Description",
-            "type": "mrkdwn",
-          },
-          "type": "section",
+          "elements": Array [
+            Object {
+              "elements": Array [
+                Object {
+                  "text": "Summary",
+                  "type": "link",
+                  "url": "https://example.com/fire",
+                },
+              ],
+              "type": "rich_text_section",
+            },
+            Object {
+              "elements": Array [
+                Object {
+                  "text": "Description",
+                  "type": "text",
+                },
+              ],
+              "type": "rich_text_section",
+            },
+          ],
+          "type": "rich_text",
         },
         Object {
           "rows": Array [
             Array [
               Object {
-                "elements": Array [
-                  Object {
-                    "elements": Array [
-                      Object {
-                        "text": "1",
-                        "type": "text",
-                      },
-                    ],
-                    "type": "rich_text_section",
-                  },
-                ],
-                "type": "rich_text",
+                "text": "1",
+                "type": "raw_text",
               },
               Object {
                 "elements": Array [
@@ -296,18 +349,8 @@ Array [
             ],
             Array [
               Object {
-                "elements": Array [
-                  Object {
-                    "elements": Array [
-                      Object {
-                        "text": "2",
-                        "type": "text",
-                      },
-                    ],
-                    "type": "rich_text_section",
-                  },
-                ],
-                "type": "rich_text",
+                "text": "2",
+                "type": "raw_text",
               },
               Object {
                 "elements": Array [
@@ -344,13 +387,13 @@ Array [
         Object {
           "elements": Array [
             Object {
+              "text": "Footer",
+              "type": "mrkdwn",
+            },
+            Object {
               "alt_text": "footer icon",
               "image_url": "https://example.com/icon.png",
               "type": "image",
-            },
-            Object {
-              "text": "Footer",
-              "type": "mrkdwn",
             },
           ],
           "type": "context",

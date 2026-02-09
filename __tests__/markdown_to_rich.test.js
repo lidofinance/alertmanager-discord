@@ -69,6 +69,14 @@ it("should translate link", () => {
   );
 });
 
+it("should translate empty link to empty rich block", () => {
+  const markdown = "[]()";
+
+  const blocks = markdownToRich(markdown);
+
+  expect(blocks).toStrictEqual(slack.rich(slack.richSection()));
+});
+
 it("should translate nested markdown", () => {
   const markdown = "**_bolditalic_**";
 
@@ -118,7 +126,7 @@ it("should translate link with styles", () => {
 
   expect(blocks).toStrictEqual(
     slack.rich(
-      slack.richSection(slack.richLink("https://example.com", "link", false, { bold: true }))
+      slack.richSection(slack.richLink("https://example.com", "link", { style: { bold: true } }))
     )
   );
 });
@@ -185,7 +193,7 @@ it("should translate ordered list", () => {
     slack.rich(
       slack.richList(
         [slack.richSection(slack.richText("item 1")), slack.richSection(slack.richText("item 2"))],
-        "ordered"
+        { style: "ordered" }
       )
     )
   );
@@ -203,7 +211,7 @@ it("should translate ordered list preserving formatting", () => {
           slack.richSection(slack.richText("item 1", { bold: true })),
           slack.richSection(slack.richText("item 2", { italic: true })),
         ],
-        "ordered"
+        { style: "ordered" }
       )
     )
   );
@@ -225,8 +233,7 @@ it("should translate nested list", () => {
           slack.richSection(slack.richText("sub two 1")),
           slack.richSection(slack.richText("sub two 2")),
         ],
-        "ordered",
-        1
+        { style: "ordered", indent: 1 }
       ),
       slack.richList([slack.richSection(slack.richText("three"))])
     )

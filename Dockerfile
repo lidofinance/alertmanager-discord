@@ -1,13 +1,13 @@
-FROM node:20.20.0-alpine as base
+FROM node:22.22-alpine AS base
 ENV NODE_ENV production
 
-FROM base as deps
+FROM base AS deps
 WORKDIR /usr/src/app
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile --non-interactive && yarn cache clean
 COPY --chown=node:node . .
 
-FROM base as prod
+FROM base AS prod
 RUN apk add --no-cache tini=0.19.0-r3
 COPY --from=deps /usr/src/app /usr/src/app
 WORKDIR /usr/src/app
