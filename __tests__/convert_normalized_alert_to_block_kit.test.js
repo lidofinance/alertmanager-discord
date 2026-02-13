@@ -126,6 +126,22 @@ it("should produce valid context block when footer has icon_url but no text", ()
   });
 });
 
+it("should convert markdown in footer to Slack mrkdwn", () => {
+  const alert = {
+    isResolved: false,
+    title: "title",
+    footer: {
+      text: "check **this** [link](https://example.com/path)",
+    },
+  };
+
+  const result = convertNormalizedAlertToBlockKit(alert);
+
+  expect(result.blocks.at(-1)).toStrictEqual(
+    slack.context(slack.mrkdwn("check *this* <https://example.com/path|link>"))
+  );
+});
+
 it("should make title clickable for unresolved alert", () => {
   const alert = {
     isResolved: false,

@@ -3,6 +3,7 @@ const {
   markdownToRich,
   markdownToRichElements,
   markdownToPlainText,
+  markdownToSlackMrkdwn,
 } = require("./markdown_to_rich");
 
 function buildTitleAndDescription(alert) {
@@ -72,7 +73,7 @@ function buildFooter(footer) {
     elements.push(slack.image(footer.icon_url, "footer icon"));
   }
   if (footer.text) {
-    elements.push(slack.mrkdwn(footer.text));
+    elements.push(slack.mrkdwn(markdownToSlackMrkdwn(footer.text)));
   }
   return elements.length > 0 ? slack.context(...elements) : null;
 }

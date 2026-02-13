@@ -52,7 +52,7 @@ Array [
               "type": "image",
             },
             Object {
-              "text": "Footer **bold**",
+              "text": "Footer *bold*",
               "type": "mrkdwn",
             },
           ],

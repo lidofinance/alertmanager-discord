@@ -138,8 +138,56 @@ function markdownToRich(markdown) {
   return slack.rich(...markdownToRichElements(markdown));
 }
 
+function translateInlineTokenToMrkdwn(token) {
+  if (token.type === "link") {
+    if (!token.href) {
+      return token.text ?? "";
+    }
+    const text = token.tokens?.map(translateInlineTokenToMrkdwn).join("") ?? token.text ?? token.href;
+    return `<${token.href}|${text}>`;
+  }
+  if (token.type === "strong") {
+    return `*${token.tokens?.map(translateInlineTokenToMrkdwn).join("") ?? token.text ?? ""}*`;
+  }
+  if (token.type === "em") {
+    return `_${token.tokens?.map(translateInlineTokenToMrkdwn).join("") ?? token.text ?? ""}_`;
+  }
+  if (token.type === "del") {
+    return `~${token.tokens?.map(translateInlineTokenToMrkdwn).join("") ?? token.text ?? ""}~`;
+  }
+  if (token.type === "codespan") {
+    return `\`${unescapeHtml(token.text ?? "")}\``;
+  }
+  if (token.type === "br") {
+    return "\n";
+  }
+  if (token.type === "image") {
+    return token.title ?? token.href ?? "";
+  }
+  if (token.tokens) {
+    return token.tokens.map(translateInlineTokenToMrkdwn).join("");
+  }
+  return token.raw ?? token.text ?? "";
+}
+
+function markdownToSlackMrkdwn(markdown) {
+  const tokens = new marked.Lexer().lex(markdown);
+  return tokens
+    .map((token) => {
+      if (token.type === "paragraph" || token.type === "heading") {
+        return token.tokens?.map(translateInlineTokenToMrkdwn).join("") ?? "";
+      }
+      if (token.type === "space") {
+        return "\n";
+      }
+      return token.raw ?? "";
+    })
+    .join("");
+}
+
 module.exports = {
   markdownToRich,
   markdownToRichElements,
   markdownToPlainText,
+  markdownToSlackMrkdwn,
 };
