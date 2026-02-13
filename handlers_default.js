@@ -1,5 +1,4 @@
 const axios = require("axios");
-const marked = require("marked");
 
 const colors = { firing: 0xd50000, resolved: 0x00c853, default: 0x333333 };
 
@@ -14,64 +13,6 @@ function getMentions(alert) {
     .split(",")
     .filter(Boolean)
     .map((m) => `<@${m}>`);
-}
-
-/**
- * @typedef MarkedList
- * @prop {Array.<{text: string}} items
- */
-
-function getFields(alert, logger) {
-  /** @type {string} */
-  const fields_markdown = alert.annotations?.inline_fields;
-  if (!fields_markdown) {
-    return [];
-  }
-
-  try {
-    const parsed = marked.lexer(fields_markdown);
-    /** @type {MarkedList?} */
-    const fields = parsed.filter((e) => e.type === "list").at(0);
-    validateFieldsList(fields);
-    return transformFieldsList(fields);
-  } catch (err) {
-    if (logger != null) {
-      logger.error(err.stack);
-    } else {
-      console.error(err);
-    }
-    return [];
-  }
-}
-
-/**
- * @param {MarkedList?} list
- */
-function validateFieldsList(list) {
-  const fields = list?.items?.map((e) => e.text);
-
-  if (!fields) {
-    throw new Error("Fields list is empty");
-  }
-
-  if (fields.length > 25) {
-    throw new Error("Too many fields");
-  }
-
-  fields.forEach((e) => {
-    if (e.length > 1024) {
-      throw new Error("Too many characters in a field");
-    }
-  });
-}
-
-/**
- * @param {MarkedList} list
- */
-function transformFieldsList(list) {
-  return list.items.map((e) => {
-    return { name: "", value: e.text.trim(), inline: true };
-  });
 }
 
 async function handleHook(ctx) {
@@ -107,11 +48,6 @@ async function handleHook(ctx) {
       if (mentions.length) {
         body.allowed_mentions = { parse: ["users", "roles"] };
         body.content = mentions.join(" ");
-      }
-
-      const fields = getFields(alert, ctx.logger);
-      if (fields.length) {
-        body.embeds.at(0).fields = fields;
       }
 
       objectsToSend.push(body);
@@ -154,5 +90,4 @@ async function handleHook(ctx) {
 module.exports = {
   handleHook,
   getMentions,
-  getFields,
 };

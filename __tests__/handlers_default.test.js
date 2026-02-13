@@ -1,7 +1,7 @@
 const axios = require("axios");
 jest.mock("axios");
 
-const { handleHook, getMentions, getFields } = require("../handlers_default");
+const { handleHook, getMentions } = require("../handlers_default");
 
 function getAlert(i) {
   return {
@@ -117,7 +117,7 @@ test("hook works (mentions)", async () => {
   expect(axios.post.mock.calls).toMatchSnapshot();
 });
 
-test("hook works (fields)", async () => {
+test("hook ignores inline_fields", async () => {
   // mock
   const ctx = {
     state: { hook: "/dev/null" },
@@ -169,60 +169,4 @@ test("getMentions works (valid label's value)", () => {
   });
 
   expect(mentions).toStrictEqual(["<@123>", "<@456>"]);
-});
-
-test("getFields works (no inline_fields)", () => {
-  const logger = {
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-  };
-
-  const fields = getFields(
-    {
-      annotations: {},
-    },
-    logger
-  );
-
-  expect(fields.length).toBe(0);
-});
-
-test("getFields works (not a list)", () => {
-  const logger = {
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-  };
-
-  const fields = getFields(
-    {
-      annotations: {
-        inline_fields: "**hm**",
-      },
-    },
-    logger
-  );
-
-  expect(fields.length).toBe(0);
-});
-
-test("getFields works (valid list)", () => {
-  const fields = getFields({
-    annotations: {
-      inline_fields: "- **hm**",
-    },
-  });
-
-  expect(fields.length).toBe(1);
-});
-
-test("getFields works (nested list)", () => {
-  const fields = getFields({
-    annotations: {
-      inline_fields: "- **hm**\n\t+ **hmmm**",
-    },
-  });
-
-  expect(fields.length).toBe(1);
 });

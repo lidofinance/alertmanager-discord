@@ -75,17 +75,6 @@ environment:
   MAX_TABLE_ROWS: 50
 ```
 
-#### Inline fields
-
-Provide `inline_fields` alert's annotation to insert inline fields in Discord or a Slack rich_text bullet list
-using values from a markdown list:
-
-```yaml
-inline_fields: |
-  - hello
-  - there
-```
-
 ## Alternative working mode
 
 If you want to use this service in alternative working mode, you can provide `WORKING_MODE` environment variable.
