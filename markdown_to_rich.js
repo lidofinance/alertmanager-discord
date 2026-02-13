@@ -143,7 +143,8 @@ function translateInlineTokenToMrkdwn(token) {
     if (!token.href) {
       return token.text ?? "";
     }
-    const text = token.tokens?.map(translateInlineTokenToMrkdwn).join("") ?? token.text ?? token.href;
+    const text =
+      token.tokens?.map(translateInlineTokenToMrkdwn).join("") ?? token.text ?? token.href;
     return `<${token.href}|${text}>`;
   }
   if (token.type === "strong") {
