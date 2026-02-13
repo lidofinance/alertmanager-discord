@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`should process realistically alert 1`] = `
+exports[`should process simple alert 1`] = `
 Array [
   Object {
     "blocks": Array [
@@ -16,7 +16,47 @@ Array [
           Object {
             "elements": Array [
               Object {
-                "text": "📥 ",
+                "text": "this is summary",
+                "type": "text",
+              },
+            ],
+            "type": "rich_text_section",
+          },
+          Object {
+            "elements": Array [
+              Object {
+                "text": "this is description",
+                "type": "text",
+              },
+            ],
+            "type": "rich_text_section",
+          },
+        ],
+        "type": "rich_text",
+      },
+    ],
+    "text": "",
+  },
+]
+`;
+
+exports[`should process realistic alert 1`] = `
+Array [
+  Object {
+    "blocks": Array [
+      Object {
+        "text": Object {
+          "text": "<@U100500>",
+          "type": "mrkdwn",
+        },
+        "type": "section",
+      },
+      Object {
+        "elements": Array [
+          Object {
+            "elements": Array [
+              Object {
+                "text": "📥 1 ",
                 "type": "text",
               },
               Object {
@@ -90,56 +130,16 @@ Array [
       Object {
         "elements": Array [
           Object {
-            "text": "Epoch • 120200202",
-            "type": "mrkdwn",
-          },
-          Object {
             "alt_text": "footer icon",
             "image_url": "https://cryptologos.cc/logos/steth-steth-logo.png",
             "type": "image",
           },
+          Object {
+            "text": "Epoch • 120200202",
+            "type": "mrkdwn",
+          },
         ],
         "type": "context",
-      },
-    ],
-    "text": "",
-  },
-]
-`;
-
-exports[`should process simple alert 1`] = `
-Array [
-  Object {
-    "blocks": Array [
-      Object {
-        "text": Object {
-          "text": "<@U100500>",
-          "type": "mrkdwn",
-        },
-        "type": "section",
-      },
-      Object {
-        "elements": Array [
-          Object {
-            "elements": Array [
-              Object {
-                "text": "this is summary",
-                "type": "text",
-              },
-            ],
-            "type": "rich_text_section",
-          },
-          Object {
-            "elements": Array [
-              Object {
-                "text": "this is description",
-                "type": "text",
-              },
-            ],
-            "type": "rich_text_section",
-          },
-        ],
-        "type": "rich_text",
       },
     ],
     "text": "",

@@ -8,8 +8,9 @@ const { chunks } = require("./utils.js");
  * Alerts with fields are merged in chunks before conversion; otherwise each
  * alert is converted separately.
  *
- * @param group - Group of normalized alerts.
- * @returns Slack webhook payloads for the group.
+ * @param {Array<object>} group
+ * @param {number} maxTableRows
+ * @returns {Array<{text: string, blocks: Array<object>}>}
  */
 function processGroup(group, maxTableRows) {
   const [first] = group;
@@ -27,8 +28,9 @@ function processGroup(group, maxTableRows) {
  * Normalizes raw Alertmanager alerts, groups them by status, and converts each
  * group to one or more Slack webhook payloads.
  *
- * @param input - Raw Alertmanager alerts.
- * @returns Slack webhook payloads ready to send.
+ * @param {Array<object>} input
+ * @param {{maxTableRows?: number}=} options
+ * @returns {Array<{text: string, blocks: Array<object>}>}
  */
 function processRawAlerts(input, options) {
   const { maxTableRows = MAX_TABLE_ROWS } = options ?? {};

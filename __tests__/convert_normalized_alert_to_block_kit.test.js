@@ -30,7 +30,7 @@ it("should convert simple alert", () => {
       slack.mrkdwnSection("<@U100500> <@ULALA>"),
       slack.rich(
         slack.richSection(
-          slack.richText("📈📝❌ "),
+          slack.richText("📈📝❌ 1 "),
           slack.richText("Bold", { bold: true }),
           slack.richText(" and normal, and maybe just a little "),
           slack.richText("italic", { italic: true })
@@ -57,11 +57,11 @@ it("should convert simple alert", () => {
         ],
       ]),
       slack.context(
-        slack.mrkdwn("from Lido with Love"),
         slack.image(
           "https://pbs.twimg.com/profile_images/625633822235693056/lNGUneLX_400x400.jpg",
           "footer icon"
-        )
+        ),
+        slack.mrkdwn("from Lido with Love")
       ),
     ],
   });
@@ -81,9 +81,7 @@ it("should handle alert with only description (no title)", () => {
 
 it("should split mentions into multiple sections when exceeding MAX_TEXT_LENGTH", () => {
   // 400 unique mentions → ~4400 chars of "<@U10000> <@U10001> ..." — well over 3000
-  const mentions = new Set(
-    Array.from({ length: 400 }, (_, i) => `<@U${10000 + i}>`)
-  );
+  const mentions = new Set(Array.from({ length: 400 }, (_, i) => `<@U${10000 + i}>`));
   const alert = {
     isResolved: false,
     title: "test",
@@ -99,7 +97,7 @@ it("should split mentions into multiple sections when exceeding MAX_TEXT_LENGTH"
   expect(mentionBlocks.length).toBeGreaterThan(1);
   // Every section must respect the 3000-char limit
   for (const block of mentionBlocks) {
-    expect(block.text.text.length).toBeLessThanOrEqual(3000);
+    expect(block.text.text.length).toBeLessThanOrEqual(slack.MAX_TEXT_LENGTH);
   }
   // All mentions must be present across all sections
   const allText = mentionBlocks.map((b) => b.text.text).join(" ");

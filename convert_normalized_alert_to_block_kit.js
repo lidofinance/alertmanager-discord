@@ -7,17 +7,22 @@ const {
 
 function buildTitleAndDescription(alert) {
   const elements = [];
+  const fieldsCount = alert.fields?.length ?? 0;
+  const titlePrefix = buildTextPrefix({
+    emoji: alert.emoji,
+    count: fieldsCount > 0 ? fieldsCount : null,
+  });
 
   if (alert.title) {
     if (!alert.isResolved && alert.url) {
       // Unresolved alert with URL: title becomes a clickable link (markdown stripped)
       const plainTitle = markdownToPlainText(alert.title);
-      const titleWithEmoji = alert.emoji ? `${alert.emoji} ${plainTitle}` : plainTitle;
-      elements.push(slack.richSection(slack.richLink(alert.url, titleWithEmoji)));
+      const titleText = `${titlePrefix}${plainTitle}`.trim();
+      elements.push(slack.richSection(slack.richLink(alert.url, titleText)));
     } else {
       // Resolved alert or no URL: title rendered with markdown formatting
       const titleElements = markdownToRichElements(alert.title);
-      prependEmojiToFirstSection(titleElements, alert.emoji);
+      prependTextToFirstSection(titleElements, titlePrefix);
       elements.push(...titleElements);
     }
   }
@@ -25,9 +30,9 @@ function buildTitleAndDescription(alert) {
   // Append description
   if (alert.description) {
     const descriptionElements = markdownToRichElements(alert.description);
-    // If no title but has emoji, prepend emoji to description
-    if (!alert.title && alert.emoji) {
-      prependEmojiToFirstSection(descriptionElements, alert.emoji);
+    // If no title, prepend the same title prefix to description (emoji and optional fields count).
+    if (!alert.title) {
+      prependTextToFirstSection(descriptionElements, titlePrefix);
     }
     elements.push(...descriptionElements);
   }
@@ -35,9 +40,20 @@ function buildTitleAndDescription(alert) {
   return slack.rich(...elements);
 }
 
-function prependEmojiToFirstSection(elements, emoji) {
-  if (emoji && elements.length > 0 && elements[0].type === "rich_text_section") {
-    elements[0].elements.unshift(slack.richText(`${emoji} `));
+function buildTextPrefix({ emoji, count }) {
+  const parts = [];
+  if (emoji) {
+    parts.push(emoji);
+  }
+  if (Number.isInteger(count) && count > 0) {
+    parts.push(String(count));
+  }
+  return parts.length > 0 ? `${parts.join(" ")} ` : "";
+}
+
+function prependTextToFirstSection(elements, textPrefix) {
+  if (textPrefix && elements.length > 0 && elements[0].type === "rich_text_section") {
+    elements[0].elements.unshift(slack.richText(textPrefix));
   }
 }
 
@@ -52,11 +68,11 @@ function buildFieldsTable(fields) {
 
 function buildFooter(footer) {
   const elements = [];
-  if (footer.text) {
-    elements.push(slack.mrkdwn(footer.text));
-  }
   if (footer.icon_url) {
     elements.push(slack.image(footer.icon_url, "footer icon"));
+  }
+  if (footer.text) {
+    elements.push(slack.mrkdwn(footer.text));
   }
   return elements.length > 0 ? slack.context(...elements) : null;
 }

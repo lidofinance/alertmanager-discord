@@ -148,7 +148,7 @@ async function handleHook(ctx) {
     });
   }
 
-  ctx.logger.info(`${objectsToSend.length} objects have been sent`);
+  ctx.logger.info(`${objectsToSend.length} objects have been sent to Discord`);
 }
 
 module.exports = {

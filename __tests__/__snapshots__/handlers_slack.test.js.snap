@@ -47,13 +47,13 @@ Array [
         Object {
           "elements": Array [
             Object {
-              "text": "Footer **bold**",
-              "type": "mrkdwn",
-            },
-            Object {
               "alt_text": "footer icon",
               "image_url": "https://example.com/icon.png",
               "type": "image",
+            },
+            Object {
+              "text": "Footer **bold**",
+              "type": "mrkdwn",
             },
           ],
           "type": "context",
@@ -82,6 +82,10 @@ Array [
           "elements": Array [
             Object {
               "elements": Array [
+                Object {
+                  "text": "2 ",
+                  "type": "text",
+                },
                 Object {
                   "text": "Resolved Summary",
                   "type": "text",
@@ -177,13 +181,13 @@ Array [
         Object {
           "elements": Array [
             Object {
-              "text": "Footer",
-              "type": "mrkdwn",
-            },
-            Object {
               "alt_text": "footer icon",
               "image_url": "https://example.com/icon.png",
               "type": "image",
+            },
+            Object {
+              "text": "Footer",
+              "type": "mrkdwn",
             },
           ],
           "type": "context",
@@ -200,6 +204,10 @@ Array [
           "elements": Array [
             Object {
               "elements": Array [
+                Object {
+                  "text": "1 ",
+                  "type": "text",
+                },
                 Object {
                   "text": "Resolved Summary",
                   "type": "text",
@@ -261,13 +269,13 @@ Array [
         Object {
           "elements": Array [
             Object {
-              "text": "Footer",
-              "type": "mrkdwn",
-            },
-            Object {
               "alt_text": "footer icon",
               "image_url": "https://example.com/icon.png",
               "type": "image",
+            },
+            Object {
+              "text": "Footer",
+              "type": "mrkdwn",
             },
           ],
           "type": "context",
@@ -292,7 +300,7 @@ Array [
             Object {
               "elements": Array [
                 Object {
-                  "text": "Summary",
+                  "text": "2 Summary",
                   "type": "link",
                   "url": "https://example.com/fire",
                 },
@@ -387,13 +395,13 @@ Array [
         Object {
           "elements": Array [
             Object {
-              "text": "Footer",
-              "type": "mrkdwn",
-            },
-            Object {
               "alt_text": "footer icon",
               "image_url": "https://example.com/icon.png",
               "type": "image",
+            },
+            Object {
+              "text": "Footer",
+              "type": "mrkdwn",
             },
           ],
           "type": "context",

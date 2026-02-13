@@ -175,23 +175,22 @@ function validateTable(rows, columnSettings) {
   if (!Array.isArray(rows)) {
     throw new Error(`rows should be an array, given ${typeof rows}`);
   }
+
   if (rows.length > MAX_TABLE_ROWS) {
     throw new Error(`Slack table supports up to ${MAX_TABLE_ROWS} rows, but given: ${rows.length}`);
-  }
-  if (rows.find((row) => !Array.isArray(row))) {
-    const index = rows.findIndex((row) => !Array.isArray(row));
-    throw new Error(`row at index ${index} should be an array, given ${typeof rows[index]}`);
-  }
-  if (rows.find((row) => row.length > MAX_TABLE_COLUMNS)) {
-    const index = rows.findIndex((row) => row.length > MAX_TABLE_COLUMNS);
-    const columnsCount = rows[index]?.length;
-    throw new Error(
-      `Slack table supports up to ${MAX_TABLE_COLUMNS} columns, but at index ${index} given: ${columnsCount}`
-    );
   }
 
   for (let rowIndex = 0; rowIndex < rows.length; rowIndex += 1) {
     const row = rows[rowIndex];
+    if (!Array.isArray(row)) {
+      throw new Error(`row at index ${rowIndex} should be an array, given ${typeof row}`);
+    }
+    if (row.length > MAX_TABLE_COLUMNS) {
+      throw new Error(
+        `Slack table supports up to ${MAX_TABLE_COLUMNS} columns, but at index ${rowIndex} given: ${row.length}`
+      );
+    }
+
     for (let cellIndex = 0; cellIndex < row.length; cellIndex += 1) {
       const cell = row[cellIndex];
       if (cell == null || typeof cell !== "object") {
@@ -222,17 +221,20 @@ function validateTable(rows, columnSettings) {
     );
   }
 
+  const allowedAlign = ["left", "center", "right"];
+  const allowedKeys = ["align", "is_wrapped"];
+
   if (columnSettings) {
-    const allowedAlign = ["left", "center", "right"];
     for (let index = 0; index < columnSettings.length; index += 1) {
       const settings = columnSettings[index];
       if (settings == null) {
         continue;
       }
+
       if (typeof settings !== "object") {
         throw new Error(`columnSettings[${index}] should be an object, given ${typeof settings}`);
       }
-      const allowedKeys = ["align", "is_wrapped"];
+
       for (const key of Object.keys(settings)) {
         if (!allowedKeys.includes(key)) {
           throw new Error(
@@ -240,11 +242,13 @@ function validateTable(rows, columnSettings) {
           );
         }
       }
+
       if (settings.align != null && !allowedAlign.includes(settings.align)) {
         throw new Error(
           `columnSettings[${index}].align should be 'left', 'center', or 'right', given ${settings.align}`
         );
       }
+
       if (settings.is_wrapped != null && typeof settings.is_wrapped !== "boolean") {
         throw new Error(
           `columnSettings[${index}].is_wrapped should be boolean or unset, given ${settings.is_wrapped}`

@@ -28,7 +28,7 @@ async function handleHook(ctx) {
   }
 
   const { sent, total } = await sendSlackMessages(ctx, hook, messages, alertsCount);
-  ctx.logger.info(`${sent}/${total}/${alertsCount} objects have been sent`);
+  ctx.logger.info(`${sent}/${total}/${alertsCount} objects have been sent to Slack`);
 }
 
 module.exports = {

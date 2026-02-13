@@ -20,7 +20,7 @@ it("should process simple alert", () => {
   expect(result).toMatchSnapshot();
 });
 
-it("should process realistically alert", async () => {
+it("should process realistic alert", async () => {
   const rawAlerts = [
     {
       status: "resolved",
@@ -153,6 +153,20 @@ it("should group alerts if `field_name` and `field_value` exists", () => {
   expect(Array.isArray(firstPayload.blocks)).toBe(true);
   const mentions = firstPayload.blocks[0];
   expect(mentions).toStrictEqual(bk.mrkdwnSection("<@U123> <@U456> <@U789>"));
+
+  const table = firstPayload.blocks.find((block) => block.type === "table");
+  expect(table).toBeDefined();
+  expect(table.rows).toHaveLength(2);
+  expect(table.rows.map((row) => row.slice(1, 3))).toStrictEqual([
+    [
+      bk.rich(bk.richSection(bk.richText("name 1"))),
+      bk.rich(bk.richSection(bk.richText("value 1"))),
+    ],
+    [
+      bk.rich(bk.richSection(bk.richText("name 2"))),
+      bk.rich(bk.richSection(bk.richText("value 2"))),
+    ],
+  ]);
 });
 
 it("should split long group of alers", () => {

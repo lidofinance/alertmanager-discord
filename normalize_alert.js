@@ -132,11 +132,12 @@ function normalizeAlert(alert) {
  * Assumes all other properties are identical and uses the first alert as a base.
  *
  * @param {NormalizedAlert[]} alerts
- * @returns {NormalizedAlert|null}
+ * @returns {NormalizedAlert}
+ * @throws {Error} When `alerts` is not a non-empty array.
  */
 function combineNormalizedAlerts(alerts) {
   if (!Array.isArray(alerts) || alerts.length === 0) {
-    return null;
+    throw new Error("alerts should be a non-empty array");
   }
 
   const [first] = alerts;

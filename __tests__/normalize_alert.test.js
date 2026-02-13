@@ -286,6 +286,6 @@ it("should drop empty fields and mentions on union", () => {
   });
 });
 
-it("should return null when union input is empty", () => {
-  expect(combineNormalizedAlerts([])).toBeNull();
+it("should throw when union input is empty", () => {
+  expect(() => combineNormalizedAlerts([])).toThrow("alerts should be a non-empty array");
 });
