@@ -7,6 +7,7 @@ const winston = require("winston");
 
 const { router } = require("./router");
 const { cleanSecrets } = require("./secrets");
+const { MAX_TABLE_ROWS } = require("./block_kit");
 
 const port = toInteger(process.env.PORT) || 5001;
 
@@ -24,7 +25,7 @@ let maxTableRows = toInteger(process.env.MAX_TABLE_ROWS) || 50;
 if (maxTableRows <= 0) {
   maxTableRows = 50;
 }
-if (maxTableRows > 100) {
+if (maxTableRows > MAX_TABLE_ROWS) {
   maxTableRows = 100;
 }
 
