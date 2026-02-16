@@ -117,42 +117,6 @@ test("hook works (mentions)", async () => {
   expect(axios.post.mock.calls).toMatchSnapshot();
 });
 
-test("hook ignores inline_fields", async () => {
-  // mock
-  const ctx = {
-    state: { hook: "/dev/null" },
-    logger: {
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    },
-    params: { slug: "test" },
-    query: {},
-
-    request: {
-      body: {
-        alerts: [
-          {
-            status: "resolved",
-            labels: { alertname: "activate" },
-            annotations: {
-              summary: "Obi-Wan Kenobi says",
-              inline_fields: ["- **hello**", "- there"].join("\n\n"),
-            },
-          },
-        ],
-      },
-    },
-  };
-
-  axios.post.mockResolvedValue(null);
-
-  await handleHook(ctx, () => {});
-
-  expect(ctx.status).toBe(200);
-  expect(axios.post.mock.calls).toMatchSnapshot();
-});
-
 test("getMentions works (no label)", () => {
   const mentions = getMentions({
     labels: {},

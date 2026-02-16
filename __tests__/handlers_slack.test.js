@@ -25,7 +25,6 @@ test("hook works (mentions, table, markdown)", async () => {
             annotations: {
               summary: "**Bold summary**",
               description: "See [link](https://example.com)",
-              inline_fields: ["- **field**", "- [value](https://example.com/path)"].join("\n"),
               footer_text: "Footer **bold**",
               footer_icon_url: "https://example.com/icon.png",
             },

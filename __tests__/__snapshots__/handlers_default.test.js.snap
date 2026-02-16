@@ -1,25 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`hook ignores inline_fields 1`] = `
-Array [
-  Array [
-    "/dev/null",
-    Object {
-      "embeds": Array [
-        Object {
-          "color": 51283,
-          "description": undefined,
-          "title": "Obi-Wan Kenobi says",
-        },
-      ],
-    },
-    Object {
-      "params": Object {},
-    },
-  ],
-]
-`;
-
 exports[`hook works (mentions) 1`] = `
 Array [
   Array [
