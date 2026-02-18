@@ -113,12 +113,22 @@ function translateList(token, indent = 0) {
   return result;
 }
 
+function translateSpace(token) {
+  const count = (token.raw.match(/\n/g) || []).length;
+  if (count <= 2) {
+    return [];
+  }
+  const spaces = "\n".repeat(count - 1);
+  return [slack.richSection(slack.richText(spaces))];
+}
+
 const TOKEN_HANDLERS = {
   heading: translateHeading,
   paragraph: translateParagraph,
   code: translateCode,
   blockquote: translateBlockquote,
   list: translateList,
+  space: translateSpace,
 };
 
 function markdownToRichElements(markdown) {

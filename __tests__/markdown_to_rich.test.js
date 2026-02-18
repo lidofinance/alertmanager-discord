@@ -154,6 +154,20 @@ it("should translate multiple paragraph", () => {
   );
 });
 
+it("should preserve long space block", () => {
+  const markdown = "line 1\n\n\nline 2";
+
+  const blocks = markdownToRich(markdown);
+
+  expect(blocks).toStrictEqual(
+    slack.rich(
+      slack.richSection(slack.richText("line 1")),
+      slack.richSection(slack.richText("\n\n")),
+      slack.richSection(slack.richText("line 2"))
+    )
+  );
+});
+
 it("should translate unordered list", () => {
   const markdown = "- item 1\n- item 2";
 
