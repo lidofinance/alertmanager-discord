@@ -115,7 +115,7 @@ function translateList(token, indent = 0) {
 
 function translateSpace(token) {
   const count = (token.raw.match(/\n/g) || []).length;
-  if (count <= 2) {
+  if (count <= 1) {
     return [];
   }
   const spaces = "\n".repeat(count - 1);

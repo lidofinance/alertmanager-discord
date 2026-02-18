@@ -141,7 +141,7 @@ it("should translate multiline", () => {
   );
 });
 
-it("should translate multiple paragraph", () => {
+it("should translate multiple new lines to space block", () => {
   const markdown = "line 1\n\nline 2";
 
   const blocks = markdownToRich(markdown);
@@ -149,12 +149,13 @@ it("should translate multiple paragraph", () => {
   expect(blocks).toStrictEqual(
     slack.rich(
       slack.richSection(slack.richText("line 1")),
+      slack.richSection(slack.richText("\n")),
       slack.richSection(slack.richText("line 2"))
     )
   );
 });
 
-it("should preserve long space block", () => {
+it("should translate multiple new lines to space block 2", () => {
   const markdown = "line 1\n\n\nline 2";
 
   const blocks = markdownToRich(markdown);
