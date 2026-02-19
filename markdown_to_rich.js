@@ -1,0 +1,204 @@
+const marked = require("marked");
+const slack = require("./block_kit");
+
+function unescapeHtml(text) {
+  return text
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&");
+}
+
+function translatePlainText(token) {
+  if (token.tokens) {
+    return token.tokens.flatMap(translatePlainText);
+  }
+  if (token.type === "image") {
+    return [token.title ?? token.href];
+  }
+  return [token.raw];
+}
+
+function translateHeading(token) {
+  const text = token.tokens.flatMap(translatePlainText).join("");
+  return slack.richSection(slack.richText(text, { bold: true }));
+}
+
+const STYLE_MAP = { strong: "bold", em: "italic", del: "strike", codespan: "code" };
+
+function hasStyles(styles) {
+  return Object.keys(styles).length > 0;
+}
+
+function translateSection(token, styles = {}) {
+  const styleProp = STYLE_MAP[token.type];
+  const newStyles = styleProp ? { ...styles, [styleProp]: true } : styles;
+  const styleArg = hasStyles(newStyles) ? newStyles : undefined;
+
+  if (token.type === "link") {
+    if (!token.href && !token.text) {
+      return [];
+    }
+    return [slack.richLink(token.href, token.text, { style: styleArg })];
+  }
+  if (token.type === "codespan") {
+    return [slack.richText(unescapeHtml(token.text), styleArg)];
+  }
+  if (token.tokens) {
+    return token.tokens.flatMap((t) => translateSection(t, newStyles));
+  }
+  if (token.type === "text") {
+    return [slack.richText(token.raw, styleArg)];
+  }
+  return [];
+}
+
+function translateParagraph(token) {
+  return slack.richSection(...token.tokens.flatMap((t) => translateSection(t)));
+}
+
+function translateCode(token) {
+  return slack.richPreformatted(slack.richText(token.text));
+}
+
+function translateBlockquote(token) {
+  const elements = token.tokens
+    .filter((child) => child.type === "paragraph")
+    .flatMap((child) => child.tokens.flatMap(translateSection));
+  return slack.richQuote(...elements);
+}
+
+function partitionTokens(tokens) {
+  const lists = [];
+  const other = [];
+  for (const t of tokens) {
+    if (t.type === "list") {
+      lists.push(t);
+    } else {
+      other.push(t);
+    }
+  }
+  return { lists, other };
+}
+
+function translateList(token, indent = 0) {
+  const result = [];
+  let currentListItems = [];
+  const style = token.ordered ? "ordered" : "bullet";
+
+  function flushCurrentList() {
+    if (currentListItems.length > 0) {
+      result.push(slack.richList(currentListItems, { style, indent }));
+      currentListItems = [];
+    }
+  }
+
+  for (const item of token.items) {
+    const { lists, other } = partitionTokens(item.tokens);
+
+    if (other.length > 0) {
+      currentListItems.push(slack.richSection(...other.flatMap(translateSection)));
+    }
+
+    if (lists.length > 0) {
+      flushCurrentList();
+      for (const nested of lists) {
+        result.push(...translateList(nested, indent + 1));
+      }
+    }
+  }
+
+  flushCurrentList();
+  return result;
+}
+
+function translateSpace(token) {
+  const count = (token.raw.match(/\n/g) || []).length;
+  if (count <= 1) {
+    return [];
+  }
+  const spaces = "\n".repeat(count - 1);
+  return [slack.richSection(slack.richText(spaces))];
+}
+
+const TOKEN_HANDLERS = {
+  heading: translateHeading,
+  paragraph: translateParagraph,
+  code: translateCode,
+  blockquote: translateBlockquote,
+  list: translateList,
+  space: translateSpace,
+};
+
+function markdownToRichElements(markdown) {
+  const tokens = new marked.Lexer().lex(markdown);
+  return tokens.flatMap((t) => TOKEN_HANDLERS[t.type]?.(t) ?? []);
+}
+
+function markdownToPlainText(markdown) {
+  const tokens = new marked.Lexer().lex(markdown);
+  return tokens
+    .filter((t) => t.type === "paragraph" || t.type === "heading")
+    .flatMap((t) => t.tokens.flatMap(translatePlainText))
+    .join("");
+}
+
+function markdownToRich(markdown) {
+  return slack.rich(...markdownToRichElements(markdown));
+}
+
+function translateInlineTokenToMrkdwn(token) {
+  if (token.type === "link") {
+    if (!token.href) {
+      return token.text ?? "";
+    }
+    const text =
+      token.tokens?.map(translateInlineTokenToMrkdwn).join("") ?? token.text ?? token.href;
+    return `<${token.href}|${text}>`;
+  }
+  if (token.type === "strong") {
+    return `*${token.tokens?.map(translateInlineTokenToMrkdwn).join("") ?? token.text ?? ""}*`;
+  }
+  if (token.type === "em") {
+    return `_${token.tokens?.map(translateInlineTokenToMrkdwn).join("") ?? token.text ?? ""}_`;
+  }
+  if (token.type === "del") {
+    return `~${token.tokens?.map(translateInlineTokenToMrkdwn).join("") ?? token.text ?? ""}~`;
+  }
+  if (token.type === "codespan") {
+    return `\`${unescapeHtml(token.text ?? "")}\``;
+  }
+  if (token.type === "br") {
+    return "\n";
+  }
+  if (token.type === "image") {
+    return token.title ?? token.href ?? "";
+  }
+  if (token.tokens) {
+    return token.tokens.map(translateInlineTokenToMrkdwn).join("");
+  }
+  return token.raw ?? token.text ?? "";
+}
+
+function markdownToSlackMrkdwn(markdown) {
+  const tokens = new marked.Lexer().lex(markdown);
+  return tokens
+    .map((token) => {
+      if (token.type === "paragraph" || token.type === "heading") {
+        return token.tokens?.map(translateInlineTokenToMrkdwn).join("") ?? "";
+      }
+      if (token.type === "space") {
+        return "\n";
+      }
+      return token.raw ?? "";
+    })
+    .join("");
+}
+
+module.exports = {
+  markdownToRich,
+  markdownToRichElements,
+  markdownToPlainText,
+  markdownToSlackMrkdwn,
+};
