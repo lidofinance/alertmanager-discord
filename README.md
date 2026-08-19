@@ -4,7 +4,7 @@ Converts Prometheus Alertmanager webhook to Discord or Slack webhooks.
 
 Default port to listen on is 5001 and can be configured by environment variable `PORT`.
 
-Store configuration at `/etc/alertmanager-discord.yml` file e.g.:
+Store configuration at `/etc/alertmanager-discord.yml` file, or wherever `CONFIG_PATH` points, e.g.:
 
 ```yaml
 hooks:
@@ -43,6 +43,23 @@ receivers:
     webhook_configs:
       - url: "http://alertmanager-discord:5001/hook/balval-alerts"
 ```
+
+## Configuration reload
+
+The configuration file is re-read when its modification time changes, so a rotated webhook URL takes
+effect without a restart. The path is polled every `SECRETS_POLL_INTERVAL_IN_SECONDS` (default 10),
+and polled rather than watched: a renderer that renames a new file over the path leaves a watch bound
+to an inode nothing writes to any more.
+
+A reload replaces the routes and the tokens the logs are scrubbed against, and logs the slugs that
+were added, removed or re-pointed. It does not restart the process, touch a request already in
+flight, or resend anything. A render that can not be used — missing file, broken YAML, no valid hooks
+— is not applied at all: the previous routes stay in force and one line is logged.
+
+## Shutdown
+
+On `SIGTERM` and `SIGINT` the service stops accepting connections, lets the requests it already
+accepted finish, and exits. `SHUTDOWN_TIMEOUT_IN_SECONDS` (default 10) caps how long that wait lasts.
 
 ## Additional features
 

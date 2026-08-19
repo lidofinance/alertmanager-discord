@@ -1,13 +1,19 @@
 // Simple Discord webhook proxy for Alertmanager
 
 const Koa = require("koa");
-const yaml = require("js-yaml");
-const fs = require("fs");
 const winston = require("winston");
 
 const { router } = require("./router");
 const { cleanSecrets } = require("./secrets");
 const { MAX_TABLE_ROWS } = require("./block_kit");
+const {
+  ConfigWatcher,
+  DEFAULT_CONFIG_PATH,
+  DEFAULT_POLL_INTERVAL_IN_SECONDS,
+  describeRouteChanges,
+  parseRoutes,
+  readConfig,
+} = require("./config");
 
 const port = toInteger(process.env.PORT) || 5001;
 
@@ -29,39 +35,38 @@ if (maxTableRows > MAX_TABLE_ROWS) {
   maxTableRows = 100;
 }
 
-const configPath = "/etc/alertmanager-discord.yml";
-const discordHookRegExp = new RegExp(
-  "^https://discord(?:app)?\\.com/api/webhooks/[0-9]+/[a-zA-Z0-9_-]+$"
-);
-const slackHookRegExp = new RegExp("^https://hooks\\.slack\\.com/services/[^/]+/[^/]+/[^/]+$");
+// In Kubernetes the file is rendered by the OpenBao agent, which can not write into /etc without
+// mounting a volume over the whole directory and taking the image's CA bundle with it.
+const configPath = process.env.CONFIG_PATH || DEFAULT_CONFIG_PATH;
 
-if (require.main === module) {
+const pollIntervalInSeconds =
+  toInteger(process.env.SECRETS_POLL_INTERVAL_IN_SECONDS) || DEFAULT_POLL_INTERVAL_IN_SECONDS;
+const shutdownTimeoutInSeconds = toInteger(process.env.SHUTDOWN_TIMEOUT_IN_SECONDS) || 10;
+
+function start() {
   let config,
     routes = {},
     webhookTokens = [];
 
   try {
-    config = yaml.load(fs.readFileSync(configPath));
+    config = readConfig(configPath);
   } catch (err) {
     console.error("Failed to read configuration file:", err.message);
   }
 
   if (config !== undefined && config.hooks !== undefined && Array.isArray(config.hooks)) {
     try {
-      ({ routes, webhookTokens } = parseRoutes(config.hooks, {
-        discordHookRegExp,
-        slackHookRegExp,
-      }));
+      ({ routes, webhookTokens } = parseRoutes(config.hooks));
     } catch (err) {
       console.error(`Invalid configuration: ${err.message}`);
       process.exit(1);
     }
   }
 
-  const logFormatter = winston.format.combine(
-    cleanSecrets({ secrets: webhookTokens }),
-    winston.format.json()
-  );
+  // winston keeps this options object by reference and reads `secrets` on every line, so the
+  // scrubber only follows a rotation if new tokens are assigned into it instead of into a copy.
+  const secretsOptions = { secrets: webhookTokens };
+  const logFormatter = winston.format.combine(cleanSecrets(secretsOptions), winston.format.json());
   const transport = new winston.transports.Console({
     format: logFormatter,
   });
@@ -80,7 +85,24 @@ if (require.main === module) {
   };
   app.use(router.routes());
 
-  app.listen(port, (err) => {
+  const watcher = new ConfigWatcher({
+    path: configPath,
+    intervalInSeconds: pollIntervalInSeconds,
+    onChange: (loaded) => {
+      const changes = describeRouteChanges(app.context.routes, loaded.routes);
+      // Assign, never mutate in place: a request resolving a slug must not see a half-built map.
+      app.context.routes = loaded.routes;
+      secretsOptions.secrets = loaded.webhookTokens;
+
+      if (changes !== null) {
+        logger.info(`Configuration reloaded: ${changes}`);
+      }
+    },
+    onError: (message) => logger.error(message),
+  });
+  watcher.start();
+
+  const server = app.listen(port, (err) => {
     if (err) {
       logger.error(err.stack);
       return;
@@ -88,6 +110,33 @@ if (require.main === module) {
 
     logger.info("Listening on port " + port);
   });
+
+  let shuttingDown = false;
+
+  function shutdown(signal) {
+    if (shuttingDown) {
+      return;
+    }
+    shuttingDown = true;
+
+    // One line, so a pod that went away on purpose is distinguishable from one that was killed.
+    logger.info(`Shutting down on ${signal}`);
+    watcher.stop();
+
+    const deadline = setTimeout(() => process.exit(0), shutdownTimeoutInSeconds * 1000);
+    server.close(() => {
+      clearTimeout(deadline);
+      process.exit(0);
+    });
+    // Alertmanager keeps connections alive between alerts, and an idle one holds server.close()
+    // open until the deadline.
+    server.closeIdleConnections();
+  }
+
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
+  process.on("SIGINT", () => shutdown("SIGINT"));
+
+  return { app, logger, server, shutdown, watcher };
 }
 
 function toInteger(value) {
@@ -110,50 +159,10 @@ function toInteger(value) {
   return null;
 }
 
-function parseRoutes(hooks, { discordHookRegExp, slackHookRegExp }) {
-  const routes = {};
-  const webhookTokens = [];
-  const validTypes = new Set(["discord", "slack"]);
-  const webhookSearchPatterns = {
-    discord: "/api/webhooks/",
-    slack: "/services/",
-  };
+module.exports = {
+  start,
+};
 
-  for (const route of hooks) {
-    const type = (route.type || "discord").toLowerCase();
-    if (!validTypes.has(type)) {
-      throw new Error(`Unsupported hook type "${route.type}" for slug "${route.slug}"`);
-    }
-
-    if (!route.slug) {
-      throw new Error("Hook entry is missing slug");
-    }
-
-    if (!route.hook || typeof route.hook !== "string") {
-      throw new Error(`Hook entry for slug "${route.slug}" is missing hook URL`);
-    }
-
-    const hookMatches =
-      type === "discord" ? discordHookRegExp.test(route.hook) : slackHookRegExp.test(route.hook);
-
-    if (!hookMatches) {
-      throw new Error(`Invalid ${type} webhook URL for slug "${route.slug}"`);
-    }
-
-    if (routes[route.slug]) {
-      throw new Error(`Duplicate slug "${route.slug}"`);
-    }
-
-    routes[route.slug] = { type, hook: route.hook };
-
-    const webhookPatternIndex = route.hook.indexOf(webhookSearchPatterns[type]);
-    if (webhookPatternIndex !== -1) {
-      const webhookToken = route.hook.substring(
-        webhookPatternIndex + webhookSearchPatterns[type].length
-      );
-      webhookTokens.push(webhookToken);
-    }
-  }
-
-  return { routes, webhookTokens };
+if (require.main === module) {
+  start();
 }
