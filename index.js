@@ -35,8 +35,7 @@ if (maxTableRows > MAX_TABLE_ROWS) {
   maxTableRows = 100;
 }
 
-// In Kubernetes the file is rendered by the OpenBao agent, which can not write into /etc without
-// mounting a volume over the whole directory and taking the image's CA bundle with it.
+// Configurable, because a secrets manager that writes the file may not be able to write into /etc.
 const configPath = process.env.CONFIG_PATH || DEFAULT_CONFIG_PATH;
 
 const pollIntervalInSeconds =

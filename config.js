@@ -1,13 +1,9 @@
-// Reading the hooks config, and noticing a rotation of it.
+// Reading the hooks config, and noticing when it changes.
 //
-// In Kubernetes the file is rendered by the OpenBao agent, which writes a temp file and renames it
-// over the path. The rename is atomic, so a reader never sees half a file, but it also creates a new
-// inode -- which is why this polls the path with stat() instead of using fs.watch. A watch bound to
-// the file goes silent after the first rotation.
-//
-// A Slack or Discord incoming webhook stays valid until someone deletes it, so a rotation that was
-// never picked up looks exactly like a healthy service. Same contract as ethereum-head-watcher's
-// src/secrets.py.
+// The file is replaced by a rename, which gives it a new inode, so this polls the path with stat()
+// instead of using fs.watch: a watch bound to the file goes silent after the first replacement.
+// Picking a change up matters because a webhook stays valid until someone deletes it, so a config
+// that was never re-read looks like a healthy service.
 
 const fs = require("fs");
 const yaml = require("js-yaml");
