@@ -8,8 +8,8 @@ const hookUrl = (token) => `https://discord.com/api/webhooks/123/${token}`;
 
 let dir, configPath, renders;
 
-// Renders a temp file and renames it over the path, the way the OpenBao agent does. The mtime is
-// bumped explicitly so the test does not depend on the filesystem's timestamp resolution.
+// Renders a temp file and renames it over the path. The mtime is bumped explicitly so the test does
+// not depend on the filesystem's timestamp resolution.
 const render = (body) => {
   const temp = `${configPath}.temp`;
   fs.writeFileSync(temp, body);

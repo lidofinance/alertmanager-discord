@@ -72,7 +72,7 @@ function parseRoutes(hooks) {
 function loadRoutes(path) {
   const config = readConfig(path);
 
-  if (config === undefined || config === null || !Array.isArray(config.hooks)) {
+  if (config == null || !Array.isArray(config.hooks)) {
     return { routes: {}, webhookTokens: [] };
   }
 
