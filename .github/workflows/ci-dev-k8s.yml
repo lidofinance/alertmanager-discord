@@ -1,0 +1,40 @@
+name: Build and push alertmanager-discord to dev
+
+run-name: Build and push alertmanager-discord:dev to dev
+
+# The Kubernetes path. It runs alongside ci-dev.yml, which dispatches an ansible deploy to
+# infra-mainnet, on purpose: both deployments are live during the migration, and the VM one
+# keeps relaying alerts until its contour is cut over.
+#
+# The tag is mutable. ArgoCD Image Updater resolves `:dev` to a digest and syncs on the
+# digest, so a distinguishable tag per build would buy nothing here.
+#
+# The build comes from the shared reusable workflow rather than being spelled out here, so
+# action pins, buildx setup and cache behaviour live in one place across the k8s-bound
+# repos instead of drifting per repository.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - develop
+    # paths-ignore rather than the previous allowlist of "*.js", Dockerfile, package.json
+    # and yarn.lock: the allowlist matched the flat source layout at the repository root
+    # and would silently miss anything new that gets baked into the image.
+    paths-ignore:
+      - '.github/**'
+      - 'test/**'
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-push:
+    uses: lidofinance/actions/.github/workflows/k8s-build-push-harbor.yml@c7b5b6c5d8013046347d728d748fa741eb214e28
+    with:
+      tag: dev
+      registry: registry.dev.k8s-dev.org
+      registry_username: ${{ vars.REGISTRY_USERNAME }}
+      image: team-vroom/alertmanager-discord
+      environment: harbor_dev_release
+    secrets:
+      registry_token: ${{ secrets.HARBOR_DEV_TOKEN }}
