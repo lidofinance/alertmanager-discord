@@ -46,20 +46,19 @@ receivers:
 
 ## Configuration reload
 
-The configuration file is re-read when its modification time changes, so a rotated webhook URL takes
-effect without a restart. The path is polled every `SECRETS_POLL_INTERVAL_IN_SECONDS` (default 10),
-and polled rather than watched: a renderer that renames a new file over the path leaves a watch bound
-to an inode nothing writes to any more.
+The configuration file is re-read when its modification time changes, so a rotated webhook URL takes effect without a
+restart. The path is polled every `SECRETS_POLL_INTERVAL_IN_SECONDS` (default 10), and polled rather than watched: a
+renderer that renames a new file over the path leaves a watch bound to an inode nothing writes to any more.
 
-A reload replaces the routes and the tokens the logs are scrubbed against, and logs the slugs that
-were added, removed or re-pointed. It does not restart the process, touch a request already in
-flight, or resend anything. A render that can not be used — missing file, broken YAML, no valid hooks
-— is not applied at all: the previous routes stay in force and one line is logged.
+A reload replaces the routes and the tokens the logs are scrubbed against, and logs the slugs that were added, removed
+or re-pointed. It does not restart the process, touch a request already in flight, or resend anything. A render that can
+not be used — missing file, broken YAML, no valid hooks — is not applied at all: the previous routes stay in force and
+one line is logged.
 
 ## Shutdown
 
-On `SIGTERM` and `SIGINT` the service stops accepting connections, lets the requests it already
-accepted finish, and exits. `SHUTDOWN_TIMEOUT_IN_SECONDS` (default 10) caps how long that wait lasts.
+On `SIGTERM` and `SIGINT` the service stops accepting connections, lets the requests it already accepted finish, and
+exits. `SHUTDOWN_TIMEOUT_IN_SECONDS` (default 10) caps how long that wait lasts.
 
 ## Additional features
 
