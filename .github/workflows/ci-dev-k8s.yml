@@ -2,24 +2,19 @@ name: Build and push alertmanager-discord to dev
 
 run-name: Build and push alertmanager-discord:dev to dev
 
-# The Kubernetes path. It runs alongside ci-dev.yml, which dispatches an ansible deploy to
-# infra-mainnet, on purpose: both deployments are live during the migration, and the VM one
-# keeps relaying alerts until its contour is cut over.
+# Builds the mutable `dev` image tag through the shared reusable build workflow, so action
+# pins, buildx setup and cache behaviour are maintained in one place.
 #
-# The tag is mutable. ArgoCD Image Updater resolves `:dev` to a digest and syncs on the
-# digest, so a distinguishable tag per build would buy nothing here.
-#
-# The build comes from the shared reusable workflow rather than being spelled out here, so
-# action pins, buildx setup and cache behaviour live in one place across the k8s-bound
-# repos instead of drifting per repository.
+# This runs alongside ci-dev.yml and does not replace it: both delivery paths are active
+# for now.
 on:
   workflow_dispatch:
   push:
     branches:
       - develop
-    # paths-ignore rather than the previous allowlist of "*.js", Dockerfile, package.json
-    # and yarn.lock: the allowlist matched the flat source layout at the repository root
-    # and would silently miss anything new that gets baked into the image.
+    # paths-ignore rather than an allowlist of paths: an allowlist has to be extended every
+    # time a new file is baked into the image, and a forgotten entry produces a stale image
+    # with a green pipeline rather than a failure.
     paths-ignore:
       - '.github/**'
       - 'test/**'
