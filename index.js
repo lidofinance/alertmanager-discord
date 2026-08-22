@@ -62,6 +62,13 @@ function start() {
     }
   }
 
+  // A process with no routes answers 404 to every alert while /health still answers 200, which is
+  // the one failure nobody notices. An invalid entry already exits 1; so does no entry at all.
+  if (Object.keys(routes).length === 0) {
+    console.error(`No hooks loaded from ${configPath}: every alert would be answered with 404`);
+    process.exit(1);
+  }
+
   // winston keeps this options object by reference and reads `secrets` on every line, so the
   // scrubber only follows a rotation if new tokens are assigned into it instead of into a copy.
   const secretsOptions = { secrets: webhookTokens };
@@ -76,6 +83,7 @@ function start() {
   const app = new Koa();
 
   app.context.routes = routes;
+  app.context.configLoadedAt = new Date().toISOString();
   app.context.logger = logger;
   app.context.messageParams = {
     maxEmbedsLength,
@@ -91,6 +99,7 @@ function start() {
       const changes = describeRouteChanges(app.context.routes, loaded.routes);
       // Assign, never mutate in place: a request resolving a slug must not see a half-built map.
       app.context.routes = loaded.routes;
+      app.context.configLoadedAt = new Date().toISOString();
       secretsOptions.secrets = loaded.webhookTokens;
 
       if (changes !== null) {

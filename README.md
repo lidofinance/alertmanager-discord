@@ -55,6 +55,10 @@ or re-pointed. It does not restart the process, touch a request already in fligh
 not be used — missing file, broken YAML, no valid hooks — is not applied at all: the previous routes stay in force and
 one line is logged.
 
+At startup the rule is stricter: a configuration that loads no routes at all exits 1 rather than serving, because such a
+process answers 404 to every alert while `/health` still answers 200. `GET /health` reports the number of routes in
+force and when they were last read, which is the only place that state is visible — the service exposes no metrics.
+
 ## Shutdown
 
 On `SIGTERM` and `SIGINT` the service stops accepting connections, lets the requests it already accepted finish, and

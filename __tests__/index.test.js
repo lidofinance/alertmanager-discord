@@ -114,6 +114,32 @@ test("the log scrubber follows a rotation", async () => {
   expect(await line).toContain("<removed>");
 });
 
+test("a config that loads no hooks exits instead of serving 404s", () => {
+  render("hooks: []");
+  const exit = jest.spyOn(process, "exit").mockImplementation(() => {});
+  const error = jest.spyOn(console, "error").mockImplementation(() => {});
+
+  start();
+
+  expect(exit).toHaveBeenCalledWith(1);
+  expect(error).toHaveBeenCalledWith(expect.stringContaining("every alert would be answered with 404"));
+});
+
+test("the health body reports the routes in force and moves on with a rotation", () => {
+  render(configWith("alpha"));
+  const { app, watcher } = start();
+  const first = app.context.configLoadedAt;
+
+  expect(Object.keys(app.context.routes)).toEqual(["alpha"]);
+  expect(first).toBeDefined();
+
+  render(configWith("alpha", "beta"));
+  expect(watcher.checkOnce()).toBe(true);
+
+  expect(Object.keys(app.context.routes).sort()).toEqual(["alpha", "beta"]);
+  expect(Date.parse(app.context.configLoadedAt)).toBeGreaterThanOrEqual(Date.parse(first));
+});
+
 test("SIGTERM closes the server and stops the poll", async () => {
   render(configWith("alpha"));
   const { logger, server, watcher } = start();
