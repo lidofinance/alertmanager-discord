@@ -1,12 +1,19 @@
 // Simple Discord webhook proxy for Alertmanager
 
 const Koa = require("koa");
+const axios = require("axios");
 const yaml = require("js-yaml");
 const fs = require("fs");
 const winston = require("winston");
 
 const { router } = require("./router");
 const { cleanSecrets } = require("./secrets");
+const { version } = require("./package.json");
+
+// Module-level defaults reach every handler's bare `axios` call. Without a timeout a
+// hung webhook POST holds its alert forever; the UA names this app in Discord's logs.
+axios.defaults.timeout = 10_000;
+axios.defaults.headers.common["User-Agent"] = `alertmanager-discord/${version}`;
 
 const port = toInteger(process.env.PORT) || 5001;
 
