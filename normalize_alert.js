@@ -178,20 +178,36 @@ function combineNormalizedAlerts(alerts) {
   return result;
 }
 
+const SPECIAL_SLACK_MENTIONS = new Set(["@here", "@channel", "@everyone"]);
+
+// Slack user group (subteam) ids always start with `S`, while user ids start with `U` or `W`,
+// so a bare id is unambiguous. See https://docs.slack.dev/messaging/formatting-message-text
+const SLACK_USERGROUP_ID = /^S[A-Z0-9]{2,}$/;
+
+// Explicit user group reference, with or without the leading `!`: `subteam^S12345678`.
+const SLACK_USERGROUP_REFERENCE = /^!?(subteam\^[A-Za-z0-9]+)$/i;
+
 function formatSlackMention(mention) {
   const trimmed = String(mention || "").trim();
   if (!trimmed) {
     return null;
   }
 
-  const SPECIAL_MENTIONS = new Set(["@here", "@channel", "@everyone"]);
-
-  if (SPECIAL_MENTIONS.has(trimmed)) {
+  if (SPECIAL_SLACK_MENTIONS.has(trimmed)) {
     return trimmed;
   }
 
   if (/^<[^>]+>$/.test(trimmed)) {
     return trimmed;
+  }
+
+  const usergroupReference = trimmed.match(SLACK_USERGROUP_REFERENCE);
+  if (usergroupReference) {
+    return `<!${usergroupReference[1]}>`;
+  }
+
+  if (SLACK_USERGROUP_ID.test(trimmed)) {
+    return `<!subteam^${trimmed}>`;
   }
 
   return `<@${trimmed}>`;
