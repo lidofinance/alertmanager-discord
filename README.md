@@ -77,13 +77,28 @@ mentions: <user_id_0>,<user_id_1>
 User ID may be found on Discord by **Copy ID** context menu item available with
 developer mode is turned on.
 
-#### Slack users mentions
+#### Slack users and user groups mentions
 
-Provide `slack_mentions` alert's label value to mention arbitrary Slack users:
+Provide `slack_mentions` alert's label value to mention arbitrary Slack users and user groups:
 
 ```yaml
-slack_mentions: U123,U456,@here
+slack_mentions: U123,W456,S789,@here
 ```
+
+An id is read by its prefix: `U`/`W` is a user and is rendered as `<@U123>`, `S` is a user group
+(subteam) and is rendered as `<!subteam^S789>`, which is the only form Slack turns into a real group
+ping. `@here`, `@channel` and `@everyone` are passed through as they are.
+
+A user group may also be written out in full, with or without the leading `!`, which is useful when
+an id does not follow the usual prefixes:
+
+```yaml
+slack_mentions: subteam^S789
+```
+
+Anything already wrapped in angle brackets is sent to Slack untouched, so a raw `<!subteam^S789>`
+also works. User ids are listed by `users.list`, user group ids by `usergroups.list` — or copy them
+from **Copy member ID** / the group's link in Slack.
 
 #### Slack tables limit
 

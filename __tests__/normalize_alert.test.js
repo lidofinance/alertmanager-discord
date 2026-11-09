@@ -289,3 +289,33 @@ it("should drop empty fields and mentions on union", () => {
 it("should throw when union input is empty", () => {
   expect(() => combineNormalizedAlerts([])).toThrow("alerts should be a non-empty array");
 });
+
+it.each([
+  ["user id", "U12345678", "<@U12345678>"],
+  ["enterprise user id", "W12345678", "<@W12345678>"],
+  ["user group id", "S12345678", "<!subteam^S12345678>"],
+  ["user group reference", "subteam^S12345678", "<!subteam^S12345678>"],
+  ["user group reference with bang", "!subteam^S12345678", "<!subteam^S12345678>"],
+  ["raw user group", "<!subteam^S12345678>", "<!subteam^S12345678>"],
+  ["raw user", "<@U12345678>", "<@U12345678>"],
+  ["special mention", "@here", "@here"],
+  ["non-id handle", "sl1", "<@sl1>"],
+])("should format a slack mention (%s)", (_label, input, expected) => {
+  const result = normalizeAlert({
+    annotations: { summary: "summary" },
+    labels: { slack_mentions: input },
+  });
+
+  expect(result.mentions.slack).toStrictEqual(new Set([expected]));
+});
+
+it("should mix slack users, user groups and special mentions", () => {
+  const result = normalizeAlert({
+    annotations: { summary: "summary" },
+    labels: { slack_mentions: "U123, S456 ,subteam^S789,@channel" },
+  });
+
+  expect(result.mentions.slack).toStrictEqual(
+    new Set(["<@U123>", "<!subteam^S456>", "<!subteam^S789>", "@channel"])
+  );
+});
