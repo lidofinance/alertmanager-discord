@@ -2,12 +2,19 @@
 
 const Koa = require("koa");
 const axios = require("axios");
-const yaml = require("js-yaml");
-const fs = require("fs");
 const winston = require("winston");
 
 const { router } = require("./router");
 const { cleanSecrets } = require("./secrets");
+const { MAX_TABLE_ROWS } = require("./block_kit");
+const {
+  ConfigWatcher,
+  DEFAULT_CONFIG_PATH,
+  DEFAULT_POLL_INTERVAL_IN_SECONDS,
+  describeRouteChanges,
+  parseRoutes,
+  readConfig,
+} = require("./config");
 const { version } = require("./package.json");
 
 // Module-level defaults reach every handler's bare `axios` call. Without a timeout a
@@ -27,41 +34,52 @@ if (maxFieldsLength <= 0 || maxFieldsLength > 25) {
   maxFieldsLength = 25;
 }
 
-const configPath = "/etc/alertmanager-discord.yml";
-const hookRegExp = new RegExp("https://discord(?:app)?.com/api/webhooks/[0-9]+/[a-zA-Z0-9_-]+");
+let maxTableRows = toInteger(process.env.MAX_TABLE_ROWS) || 50;
+if (maxTableRows <= 0) {
+  maxTableRows = 50;
+}
+if (maxTableRows > MAX_TABLE_ROWS) {
+  maxTableRows = 100;
+}
 
-if (require.main === module) {
+// Configurable, because a secrets manager that writes the file may not be able to write into /etc.
+const configPath = process.env.CONFIG_PATH || DEFAULT_CONFIG_PATH;
+
+const pollIntervalInSeconds =
+  toInteger(process.env.SECRETS_POLL_INTERVAL_IN_SECONDS) || DEFAULT_POLL_INTERVAL_IN_SECONDS;
+const shutdownTimeoutInSeconds = toInteger(process.env.SHUTDOWN_TIMEOUT_IN_SECONDS) || 10;
+
+function start() {
   let config,
     routes = {},
     webhookTokens = [];
 
   try {
-    config = yaml.load(fs.readFileSync(configPath));
+    config = readConfig(configPath);
   } catch (err) {
     console.error("Failed to read configuration file:", err.message);
   }
 
-  const webhookSearchPattern = "/api/webhooks/";
-
   if (config !== undefined && config.hooks !== undefined && Array.isArray(config.hooks)) {
-    for (let route of config.hooks) {
-      if (!route.hook || !route.hook.startsWith || !hookRegExp.test(route.hook)) {
-        console.warn("Not a valid discord web hook for slug =", route.slug);
-        continue;
-      }
-
-      routes[route.slug] = route.hook;
-
-      const webhookPatternIndex = route.hook.indexOf(webhookSearchPattern);
-      const webhookToken = route.hook.substring(webhookPatternIndex + webhookSearchPattern.length);
-      webhookTokens.push(webhookToken);
+    try {
+      ({ routes, webhookTokens } = parseRoutes(config.hooks));
+    } catch (err) {
+      console.error(`Invalid configuration: ${err.message}`);
+      process.exit(1);
     }
   }
 
-  const logFormatter = winston.format.combine(
-    cleanSecrets({ secrets: webhookTokens }),
-    winston.format.json(),
-  );
+  // A process with no routes answers 404 to every alert while /health still answers 200, which is
+  // the one failure nobody notices. An invalid entry already exits 1; so does no entry at all.
+  if (Object.keys(routes).length === 0) {
+    console.error(`No hooks loaded from ${configPath}: every alert would be answered with 404`);
+    process.exit(1);
+  }
+
+  // winston keeps this options object by reference and reads `secrets` on every line, so the
+  // scrubber only follows a rotation if new tokens are assigned into it instead of into a copy.
+  const secretsOptions = { secrets: webhookTokens };
+  const logFormatter = winston.format.combine(cleanSecrets(secretsOptions), winston.format.json());
   const transport = new winston.transports.Console({
     format: logFormatter,
   });
@@ -72,14 +90,34 @@ if (require.main === module) {
   const app = new Koa();
 
   app.context.routes = routes;
+  app.context.configLoadedAt = new Date().toISOString();
   app.context.logger = logger;
   app.context.messageParams = {
     maxEmbedsLength,
     maxFieldsLength,
+    maxTableRows,
   };
   app.use(router.routes());
 
-  app.listen(port, (err) => {
+  const watcher = new ConfigWatcher({
+    path: configPath,
+    intervalInSeconds: pollIntervalInSeconds,
+    onChange: (loaded) => {
+      const changes = describeRouteChanges(app.context.routes, loaded.routes);
+      // Assign, never mutate in place: a request resolving a slug must not see a half-built map.
+      app.context.routes = loaded.routes;
+      app.context.configLoadedAt = new Date().toISOString();
+      secretsOptions.secrets = loaded.webhookTokens;
+
+      if (changes !== null) {
+        logger.info(`Configuration reloaded: ${changes}`);
+      }
+    },
+    onError: (message) => logger.error(message),
+  });
+  watcher.start();
+
+  const server = app.listen(port, (err) => {
     if (err) {
       logger.error(err.stack);
       return;
@@ -87,6 +125,33 @@ if (require.main === module) {
 
     logger.info("Listening on port " + port);
   });
+
+  let shuttingDown = false;
+
+  function shutdown(signal) {
+    if (shuttingDown) {
+      return;
+    }
+    shuttingDown = true;
+
+    // One line, so a pod that went away on purpose is distinguishable from one that was killed.
+    logger.info(`Shutting down on ${signal}`);
+    watcher.stop();
+
+    const deadline = setTimeout(() => process.exit(0), shutdownTimeoutInSeconds * 1000);
+    server.close(() => {
+      clearTimeout(deadline);
+      process.exit(0);
+    });
+    // Alertmanager keeps connections alive between alerts, and an idle one holds server.close()
+    // open until the deadline.
+    server.closeIdleConnections();
+  }
+
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
+  process.on("SIGINT", () => shutdown("SIGINT"));
+
+  return { app, logger, server, shutdown, watcher };
 }
 
 function toInteger(value) {
@@ -96,7 +161,7 @@ function toInteger(value) {
 
   const strValue = value.toString().trim();
 
-  if (strValue === '') {
+  if (strValue === "") {
     return null;
   }
 
@@ -107,4 +172,12 @@ function toInteger(value) {
   }
 
   return null;
+}
+
+module.exports = {
+  start,
+};
+
+if (require.main === module) {
+  start();
 }

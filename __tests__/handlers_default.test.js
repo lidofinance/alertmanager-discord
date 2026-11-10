@@ -1,7 +1,7 @@
 const axios = require("axios");
 jest.mock("axios");
 
-const { handleHook, handleHealthcheck, getMentions, getFields } = require("../handlers_default");
+const { handleHook, getMentions } = require("../handlers_default");
 
 function getAlert(i) {
   return {
@@ -17,7 +17,7 @@ function getAlert(i) {
 test("hook works (no mentions)", async () => {
   // mock
   const ctx = {
-    routes: { test: "/dev/null" },
+    state: { hook: "/dev/null" },
     logger: {
       info: jest.fn(),
       warn: jest.fn(),
@@ -45,7 +45,7 @@ test("hook works (no mentions)", async () => {
 test("hook works (missing annotations subfield)", async () => {
   // mock
   const ctx = {
-    routes: { test: "/dev/null" },
+    state: { hook: "/dev/null" },
     logger: {
       info: jest.fn(),
       warn: jest.fn(),
@@ -56,22 +56,22 @@ test("hook works (missing annotations subfield)", async () => {
 
     request: {
       body: {
-          alerts: [
-              {
-                status: "resolved",
-                labels: { alertname: "activate" },
-                annotations: {
-                  summary: "here was no description"
-                },
-              },
-              {
-                status: "resolved",
-                labels: { alertname: "activate" },
-                annotations: {
-                  description: "here was no summary"
-                },
-              },
-          ],
+        alerts: [
+          {
+            status: "resolved",
+            labels: { alertname: "activate" },
+            annotations: {
+              summary: "here was no description",
+            },
+          },
+          {
+            status: "resolved",
+            labels: { alertname: "activate" },
+            annotations: {
+              description: "here was no summary",
+            },
+          },
+        ],
       },
     },
   };
@@ -88,7 +88,7 @@ test("hook works (missing annotations subfield)", async () => {
 test("hook works (mentions)", async () => {
   // mock
   const ctx = {
-    routes: { test: "/dev/null" },
+    state: { hook: "/dev/null" },
     logger: {
       info: jest.fn(),
       warn: jest.fn(),
@@ -117,64 +117,6 @@ test("hook works (mentions)", async () => {
   expect(axios.post.mock.calls).toMatchSnapshot();
 });
 
-test("hook works (fields)", async () => {
-  // mock
-  const ctx = {
-    routes: { test: "/dev/null" },
-    logger: {
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    },
-    params: { slug: "test" },
-    query: {},
-
-    request: {
-      body: {
-        alerts: [
-          {
-            status: "resolved",
-            labels: { alertname: "activate" },
-            annotations: {
-              summary: "Obi-Wan Kenobi says",
-              inline_fields: ["- **hello**", "- there"].join("\n\n"),
-            },
-          },
-        ],
-      },
-    },
-  };
-
-  axios.post.mockResolvedValue(null);
-
-  await handleHook(ctx, () => { });
-
-  expect(ctx.status).toBe(200);
-  expect(axios.post.mock.calls).toMatchSnapshot();
-});
-
-test("healthcheck works", async () => {
-  // mock
-  const ctx = {
-    routes: { test: "/dev/null" },
-    logger: {
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    },
-    params: { slug: "test" },
-    query: {},
-  };
-
-  axios.get.mockResolvedValue(null);
-
-  await handleHealthcheck(ctx, () => {});
-
-  expect(ctx.status).toBe(200);
-  expect(ctx.body.uptime).toBeDefined();
-  expect(axios.get.mock.calls).toMatchSnapshot();
-});
-
 test("getMentions works (no label)", () => {
   const mentions = getMentions({
     labels: {},
@@ -192,53 +134,3 @@ test("getMentions works (valid label's value)", () => {
 
   expect(mentions).toStrictEqual(["<@123>", "<@456>"]);
 });
-
-test("getFields works (no inline_fields)", () => {
-  const logger = {
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-  };
-
-  const fields = getFields({
-    annotations: {},
-  }, logger);
-
-  expect(fields.length).toBe(0);
-});
-
-test("getFields works (not a list)", () => {
-  const logger = {
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-  };
-
-  const fields = getFields({
-    annotations: {
-      inline_fields: "**hm**",
-    },
-  }, logger);
-
-  expect(fields.length).toBe(0);
-})
-
-test("getFields works (valid list)", () => {
-  const fields = getFields({
-    annotations: {
-      inline_fields: "- **hm**",
-    },
-  });
-
-  expect(fields.length).toBe(1);
-})
-
-test("getFields works (nested list)", () => {
-  const fields = getFields({
-    annotations: {
-      inline_fields: "- **hm**\n\t+ **hmmm**",
-    },
-  });
-
-  expect(fields.length).toBe(1);
-})

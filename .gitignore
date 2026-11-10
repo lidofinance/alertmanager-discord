@@ -1,5 +1,6 @@
 .envrc
 /node_modules
+/coverage
 yarn-*
 
 .idea
