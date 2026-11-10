@@ -3,14 +3,14 @@
   "author": "lidofinance",
   "license": "MIT",
   "main": "index.js",
-  "version": "2.7.0",
+  "version": "2.9.1",
   "scripts": {
     "test": "jest",
     "lint": "prettier --write ."
   },
   "dependencies": {
     "@koa/router": "^10.1.1",
-    "axios": "^0.26.0",
+    "axios": "^0.32.0",
     "js-yaml": "^4.1.0",
     "koa": "^2.13.4",
     "koa-bodyparser": "^4.3.0",
