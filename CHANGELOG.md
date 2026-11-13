@@ -1,19 +1,3 @@
-# [2.10.0](https://github.com/lidofinance/alertmanager-discord/compare/2.9.1...2.10.0) (2026-11-12)
-
-
-### Bug Fixes
-
-* exit on a configuration that loads no routes, and report the routes in force on /health ([426ceee](https://github.com/lidofinance/alertmanager-discord/commit/426ceee604e40349ce19e4bf8eeb050d5cc28af4))
-* timeout and app User-Agent on outgoing webhook posts ([c724a72](https://github.com/lidofinance/alertmanager-discord/commit/c724a722040a42f1769757b2d4ff85e022219cba))
-
-
-### Features
-
-* mention Slack user groups ([7bf96ca](https://github.com/lidofinance/alertmanager-discord/commit/7bf96caa4c25fce0a66ea0bb6223c1bb724b75d5))
-* read the config from a configurable path, reload it on rotation, shut down cleanly ([93b501a](https://github.com/lidofinance/alertmanager-discord/commit/93b501ac9de10b0e19e667d9c6474563cc87f039))
-
-
-
 ## [2.9.1](https://github.com/lidofinance/alertmanager-discord/compare/2.9.0...2.9.1) (2026-01-28)
 
 
@@ -117,6 +101,15 @@
 
 * allow mentions to send ([819647c](https://github.com/lidofinance/alertmanager-discord/commit/819647c6c2d0e3d6a9a4be9a4a38629ffe417053))
 * send alerts separately with its own mentions ([16599d2](https://github.com/lidofinance/alertmanager-discord/commit/16599d21344f11c3e56b6e4e7807d554b1b26abe))
+
+
+
+## [2.1.3](https://github.com/lidofinance/alertmanager-discord/compare/2.1.2...2.1.3) (2022-09-09)
+
+
+### Bug Fixes
+
+* webhook regexp ([#11](https://github.com/lidofinance/alertmanager-discord/issues/11)) ([13dff2e](https://github.com/lidofinance/alertmanager-discord/commit/13dff2ed21720f84147c16f2d1f986328773fed3))
 
 
 
