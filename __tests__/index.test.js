@@ -114,15 +114,54 @@ test("the log scrubber follows a rotation", async () => {
   expect(await line).toContain("<removed>");
 });
 
-test("a config that loads no hooks exits instead of serving 404s", () => {
+// Lines the logger wrote to stdout before start() returned, parsed.
+const captureStdout = () => {
+  const write = jest.spyOn(process.stdout, "write").mockImplementation(() => true);
+  return () =>
+    write.mock.calls
+      .map(([chunk]) => String(chunk))
+      .filter((line) => line.startsWith("{"))
+      .map((line) => JSON.parse(line));
+};
+
+test("a config that loads no hooks exits instead of serving 404s, logging through the logger", () => {
   render("hooks: []");
   const exit = jest.spyOn(process, "exit").mockImplementation(() => {});
-  const error = jest.spyOn(console, "error").mockImplementation(() => {});
+  const lines = captureStdout();
 
   start();
 
   expect(exit).toHaveBeenCalledWith(1);
-  expect(error).toHaveBeenCalledWith(expect.stringContaining("every alert would be answered with 404"));
+  expect(lines()).toContainEqual(
+    expect.objectContaining({
+      level: "error",
+      message: expect.stringContaining("every alert would be answered with 404"),
+    })
+  );
+});
+
+test("a broken config at startup is logged without the hook URLs its YAML error quotes", () => {
+  render(`hooks:\n  - slug: alpha\n    hook: ${hookUrl("leaked-token")}\n  - slug: [`);
+  const exit = jest.spyOn(process, "exit").mockImplementation(() => {});
+  const lines = captureStdout();
+
+  start();
+
+  expect(exit).toHaveBeenCalledWith(1);
+  const output = JSON.stringify(lines());
+  expect(output).toContain("Failed to read configuration file");
+  expect(output).not.toContain("leaked-token");
+});
+
+test("startup logs the effective settings with slugs, not hook URLs", () => {
+  render(configWith("alpha"));
+  const lines = captureStdout();
+
+  start({ PORT: "5001" });
+
+  const starting = lines().find((line) => line.message === "Starting");
+  expect(starting).toMatchObject({ port: 5001, configPath, routes: { alpha: "discord" } });
+  expect(JSON.stringify(lines())).not.toContain(hookUrl("alpha"));
 });
 
 test("the health body reports the routes in force and moves on with a rotation", () => {
@@ -154,4 +193,38 @@ test("SIGTERM closes the server and stops the poll", async () => {
   expect(watcher.timer).toBeNull();
   expect(exit).toHaveBeenCalledWith(0);
   expect(info).toHaveBeenCalledWith("Shutting down on SIGTERM");
+});
+
+// The real axios, not a mock: these requests go to the service under test.
+const get = (server, route) =>
+  require("axios").get(`http://127.0.0.1:${server.address().port}${route}`, {
+    validateStatus: () => true,
+    // Every test binds the same port; a kept-alive socket would outlive its server.
+    headers: { Connection: "close" },
+  });
+
+test("/ready answers 503 once shutdown begins, while /health stays 200", async () => {
+  render(configWith("alpha"));
+  const { app, server } = start();
+  await new Promise((resolve) => server.once("listening", resolve));
+
+  expect((await get(server, "/ready")).status).toBe(200);
+
+  app.context.shuttingDown = true;
+  const ready = await get(server, "/ready");
+  expect(ready.status).toBe(503);
+  expect(ready.data).toEqual({ status: "shutting down", routes: 1 });
+  expect((await get(server, "/health")).status).toBe(200);
+});
+
+test("/metrics serves runtime metrics and build_info", async () => {
+  render(configWith("alpha"));
+  const { server } = start();
+  await new Promise((resolve) => server.once("listening", resolve));
+
+  const response = await get(server, "/metrics");
+
+  expect(response.status).toBe(200);
+  expect(response.data).toContain("process_cpu_seconds_total");
+  expect(response.data).toMatch(/build_info\{version="[^"]+",commit="[^"]+",branch="[^"]+"\} 1/);
 });

@@ -5,7 +5,8 @@ const axios = require("axios");
 const winston = require("winston");
 
 const { router } = require("./router");
-const { cleanSecrets } = require("./secrets");
+const { createMetrics, instrumentAxios } = require("./metrics");
+const { SECRET_PATTERNS, cleanSecrets } = require("./secrets");
 const { MAX_TABLE_ROWS } = require("./block_kit");
 const {
   ConfigWatcher,
@@ -54,31 +55,10 @@ function start() {
     routes = {},
     webhookTokens = [];
 
-  try {
-    config = readConfig(configPath);
-  } catch (err) {
-    console.error("Failed to read configuration file:", err.message);
-  }
-
-  if (config !== undefined && config.hooks !== undefined && Array.isArray(config.hooks)) {
-    try {
-      ({ routes, webhookTokens } = parseRoutes(config.hooks));
-    } catch (err) {
-      console.error(`Invalid configuration: ${err.message}`);
-      process.exit(1);
-    }
-  }
-
-  // A process with no routes answers 404 to every alert while /health still answers 200, which is
-  // the one failure nobody notices. An invalid entry already exits 1; so does no entry at all.
-  if (Object.keys(routes).length === 0) {
-    console.error(`No hooks loaded from ${configPath}: every alert would be answered with 404`);
-    process.exit(1);
-  }
-
-  // winston keeps this options object by reference and reads `secrets` on every line, so the
+  // Created before the config is read, so startup failures are JSON and scrubbed like any other
+  // line. winston keeps this options object by reference and reads `secrets` on every line, so the
   // scrubber only follows a rotation if new tokens are assigned into it instead of into a copy.
-  const secretsOptions = { secrets: webhookTokens };
+  const secretsOptions = { secrets: webhookTokens, regex: SECRET_PATTERNS };
   const logFormatter = winston.format.combine(cleanSecrets(secretsOptions), winston.format.json());
   const transport = new winston.transports.Console({
     format: logFormatter,
@@ -87,11 +67,53 @@ function start() {
     transports: [transport],
   });
 
+  try {
+    config = readConfig(configPath);
+  } catch (err) {
+    logger.error(`Failed to read configuration file: ${err.message}`);
+  }
+
+  if (config !== undefined && config.hooks !== undefined && Array.isArray(config.hooks)) {
+    try {
+      ({ routes, webhookTokens } = parseRoutes(config.hooks));
+      secretsOptions.secrets = webhookTokens;
+    } catch (err) {
+      logger.error(`Invalid configuration: ${err.message}`);
+      process.exit(1);
+    }
+  }
+
+  // A process with no routes answers 404 to every alert while /health still answers 200, which is
+  // the one failure nobody notices. An invalid entry already exits 1; so does no entry at all.
+  if (Object.keys(routes).length === 0) {
+    logger.error(`No hooks loaded from ${configPath}: every alert would be answered with 404`);
+    process.exit(1);
+  }
+
+  // The effective settings, once. Slugs and types only: the hook URLs are the secret.
+  logger.info("Starting", {
+    version,
+    port,
+    configPath,
+    pollIntervalInSeconds,
+    shutdownTimeoutInSeconds,
+    workingMode: process.env.WORKING_MODE || "default",
+    maxEmbedsLength,
+    maxFieldsLength,
+    maxTableRows,
+    routes: Object.fromEntries(Object.entries(routes).map(([slug, route]) => [slug, route.type])),
+  });
+
+  const metrics = createMetrics();
+  instrumentAxios(axios, metrics);
+
   const app = new Koa();
 
   app.context.routes = routes;
   app.context.configLoadedAt = new Date().toISOString();
   app.context.logger = logger;
+  app.context.metrics = metrics;
+  app.context.shuttingDown = false;
   app.context.messageParams = {
     maxEmbedsLength,
     maxFieldsLength,
@@ -133,6 +155,7 @@ function start() {
       return;
     }
     shuttingDown = true;
+    app.context.shuttingDown = true;
 
     // One line, so a pod that went away on purpose is distinguishable from one that was killed.
     logger.info(`Shutting down on ${signal}`);
