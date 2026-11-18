@@ -114,12 +114,18 @@ test("the log scrubber follows a rotation", async () => {
   expect(await line).toContain("<removed>");
 });
 
-// Lines the logger wrote to stdout before start() returned, parsed.
+// Lines the logger wrote before start() returned, parsed. winston's console transport writes to
+// console._stdout when the console has one and through console.log otherwise; which one depends
+// on how jest was started.
 const captureStdout = () => {
-  const write = jest.spyOn(process.stdout, "write").mockImplementation(() => true);
+  const calls = [jest.spyOn(console, "log").mockImplementation(() => {}).mock.calls];
+  if (console._stdout) {
+    calls.push(jest.spyOn(console._stdout, "write").mockImplementation(() => true).mock.calls);
+  }
   return () =>
-    write.mock.calls
-      .map(([chunk]) => String(chunk))
+    calls
+      .flat()
+      .map(([chunk]) => String(chunk).trim())
       .filter((line) => line.startsWith("{"))
       .map((line) => JSON.parse(line));
 };
