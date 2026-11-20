@@ -28,3 +28,24 @@ test("a process that loaded no routes says so, while still answering 200", () =>
   expect(ctx.status).toBe(200);
   expect(ctx.body.routes).toBe(0);
 });
+
+const { handleReadiness } = require("../healthcheck");
+
+test("ready with routes loaded", () => {
+  const ctx = { routes: { alpha: {} }, shuttingDown: false };
+  handleReadiness(ctx);
+  expect(ctx.status).toBe(200);
+  expect(ctx.body).toEqual({ status: "ready", routes: 1 });
+});
+
+test("not ready without routes or while shutting down", () => {
+  const empty = { routes: {} };
+  handleReadiness(empty);
+  expect(empty.status).toBe(503);
+  expect(empty.body.status).toBe("no routes");
+
+  const stopping = { routes: { alpha: {} }, shuttingDown: true };
+  handleReadiness(stopping);
+  expect(stopping.status).toBe(503);
+  expect(stopping.body.status).toBe("shutting down");
+});

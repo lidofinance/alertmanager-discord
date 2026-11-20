@@ -57,7 +57,25 @@ one line is logged.
 
 At startup the rule is stricter: a configuration that loads no routes at all exits 1 rather than serving, because such a
 process answers 404 to every alert while `/health` still answers 200. `GET /health` reports the number of routes in
-force and when they were last read, which is the only place that state is visible — the service exposes no metrics.
+force and when they were last read.
+
+## Endpoints
+
+- `GET /health` — liveness: 200 while the process serves.
+- `GET /ready` — readiness: 200 when routes are loaded, 503 with no routes or once shutdown has begun.
+- `GET /metrics` — Prometheus metrics: Node.js runtime metrics, `build_info{version,commit,branch}`, and for every
+  webhook request `alertmanager_discord_webhook_requests_total` and
+  `alertmanager_discord_webhook_request_duration_seconds` by `target` (`discord`, `slack`) and `status` (HTTP code,
+  `timeout` or `error`). A Discord or Slack outage shows up as non-2xx statuses here; the URLs are never labels.
+
+`build-info.json` is a placeholder the build pipeline overwrites with the branch and commit; a local build reports
+`unknown`.
+
+## Logs
+
+JSON lines, from the first line on. Hook tokens from the config are removed, and so is anything shaped like a Discord
+or Slack webhook URL or a bearer token, and any value under a key such as `token`, `authorization` or `hook`. At
+startup one `Starting` line lists the effective settings, with route slugs and types but not their URLs.
 
 ## Shutdown
 
