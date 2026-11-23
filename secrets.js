@@ -7,13 +7,24 @@ const traverse = require("traverse");
 
 const SECRET_REPLACER = "<removed>";
 
+// A floor under the exact tokens from the config: a webhook URL or a bearer token that reaches a log
+// line some other way, such as an error body or a hook no longer in the config, is still removed.
+const SECRET_PATTERNS = [
+  "https://discord(?:app)?\\.com/api/webhooks/[^\\s\"'\\\\]+",
+  "https://hooks\\.slack\\.com/services/[^\\s\"'\\\\]+",
+  "Bearer\\s+[A-Za-z0-9._~+/=-]+",
+];
+
+// Values under these keys are removed whatever they look like.
+const SECRET_KEYS = /authorization|token|secret|password|webhook|^hook$/i;
+
 const regExpEscape = (str) => {
   return str.replace(/[-[\]{}()*+?./\\^$|\s,]/g, "\\$&");
 };
 
 const cleanSecrets = winston.format((info, opts) => {
   const secrets = opts.secrets ?? [];
-  const regex = opts.regex ?? [];
+  const regex = opts.regex ?? SECRET_PATTERNS;
 
   return replace(secrets, regex, info);
 });
@@ -39,6 +50,10 @@ const replace = (secrets, regex, message, traversal = true) => {
         this.stop();
         return;
       }
+      if (this.key !== undefined && SECRET_KEYS.test(this.key) && typeof node !== "object") {
+        this.update(SECRET_REPLACER);
+        return;
+      }
       // IMPORTANT: Specify no traversing on recursive reads
       this.update(replace(secrets, regex, node, false));
     });
@@ -48,5 +63,6 @@ const replace = (secrets, regex, message, traversal = true) => {
 };
 
 module.exports = {
+  SECRET_PATTERNS,
   cleanSecrets,
 };

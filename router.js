@@ -4,7 +4,7 @@ const bodyParser = require("koa-bodyparser");
 const { handleHook: handleHookDiscord } = require("./handlers_default");
 const { handleHook: handleHookDiscordAlt } = require("./handlers_alternative");
 const { handleHook: handleHookSlack } = require("./handlers_slack");
-const { handleHealthcheck } = require("./healthcheck");
+const { handleHealthcheck, handleReadiness } = require("./healthcheck");
 
 const getHandler = (route, workingMode) => {
   if (!route) {
@@ -56,7 +56,12 @@ router
       await handler(ctx);
     }
   )
-  .get("/health", handleHealthcheck);
+  .get("/health", handleHealthcheck)
+  .get("/ready", handleReadiness)
+  .get("/metrics", async (ctx) => {
+    ctx.type = ctx.metrics.register.contentType;
+    ctx.body = await ctx.metrics.register.metrics();
+  });
 
 module.exports = {
   router,
